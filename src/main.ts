@@ -6,8 +6,8 @@ import { SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import basicAuth from 'express-basic-auth';
 import type { NextFunction, Request, Response } from 'express';
-import { AppModule } from './app.module';
-import { swaggerConfig } from './config/swagger.config';
+import { AppModule } from '@/app.module';
+import { swaggerConfig } from '@/config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

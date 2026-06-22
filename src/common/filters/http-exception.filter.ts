@@ -6,9 +6,9 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { LoggerService } from '../logger/logger.service';
-import { DomainError } from '../errors/domain.error';
-import { InfrastructureError } from '../errors/infrastructure.error';
+import { LoggerService } from '@/common/logger/logger.service';
+import { DomainError } from '@/common/errors/domain.error';
+import { InfrastructureError } from '@/common/errors/infrastructure.error';
 
 /**
  * Shape returned to the client for every error, regardless of cause.
