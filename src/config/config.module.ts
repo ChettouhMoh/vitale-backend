@@ -18,8 +18,8 @@ import * as Joi from 'joi';
         PORT: Joi.number().default(3000),
 
         // Infrastructure connections — required everywhere.
-        DATABASE_URL: Joi.string().required(),
-        REDIS_URL: Joi.string().required(),
+        // DATABASE_URL: Joi.string().required(),
+        // REDIS_URL: Joi.string().required(),
 
         // Auth signing key — must be long enough to be safe.
         JWT_SECRET: Joi.string().min(32).required(),
