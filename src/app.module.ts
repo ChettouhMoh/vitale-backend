@@ -4,6 +4,8 @@ import { ConfigModule } from '@/config/config.module';
 import { LoggerModule } from '@/common/logger/logger.module';
 import { HealthModule } from '@/health/health.module';
 import { HttpExceptionFilter } from '@/common/filters/http-exception.filter';
+import { PatientModule } from './patient/patient.module';
+import { PersistenceModule } from './persistence/persistence.module';
 
 @Module({
   imports: [
@@ -13,14 +15,10 @@ import { HttpExceptionFilter } from '@/common/filters/http-exception.filter';
     LoggerModule,
     // 3. Infrastructure: health checks.
     HealthModule,
-
-    // ───────────────────────────────────────────────────────────────────
-    // Domain modules will be registered below as they are built, e.g.:
-    //   AuthModule,
-    //   DoctorModule,
-    //   PatientModule,
-    //   NfcCardModule,
-    // ───────────────────────────────────────────────────────────────────
+    // 4. Persistence Layer (repositories, adapters, etc...) and It's GLobal
+    PersistenceModule,
+    // 5. Domain modules.
+    PatientModule,
   ],
   providers: [
     // Global exception filter registered via DI so it can inject LoggerService.
