@@ -38,19 +38,9 @@ export class DateOfBirth {
     return new DateOfBirth(date);
   }
 
-  /** Age in full years as of today — used in NFC emergency payload */
-  get age(): number {
-    const today = new Date();
-    let age = today.getFullYear() - this._value.getFullYear();
-    const m = today.getMonth() - this._value.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < this._value.getDate())) age--;
-    return age;
-  }
-
   get value(): Date {
     return this._value;
   }
-
   get iso(): string {
     return this._value.toISOString();
   }

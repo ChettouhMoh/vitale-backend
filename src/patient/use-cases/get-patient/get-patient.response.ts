@@ -19,9 +19,6 @@ export class PatientResponse {
   @ApiProperty({ example: '1990-04-15T00:00:00.000Z' })
   dateOfBirth!: string;
 
-  @ApiProperty({ example: 30 })
-  age!: number;
-
   @ApiProperty({ example: 'female' })
   gender!: string;
 
@@ -54,7 +51,6 @@ export class PatientResponse {
     res.id = patient.id;
     res.fullName = patient.fullName;
     res.dateOfBirth = patient.dateOfBirth.toISOString();
-    res.age = patient.age;
     res.gender = patient.gender;
     res.bloodType = patient.bloodType;
     res.avatarUrl = patient.avatarUrl;

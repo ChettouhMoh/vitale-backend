@@ -73,7 +73,7 @@ interface PatientProps {
 export interface NfcEmergencyPayload {
   patientId: string;
   fullName: string;
-  age: number;
+  dateOfBirth: string;
   bloodType: string;
   isUniversalDonor: boolean;
   allergies: string[];
@@ -197,7 +197,7 @@ export class Patient {
     return {
       patientId: this._id,
       fullName: this.props.fullName,
-      age: this.props.dateOfBirth.age,
+      dateOfBirth: this.props.dateOfBirth.iso,
       bloodType: this.props.bloodType.value,
       isUniversalDonor: this.props.bloodType.isUniversalDonor,
       allergies: this.props.allergies.values,
@@ -226,9 +226,7 @@ export class Patient {
   get dateOfBirth(): Date {
     return this.props.dateOfBirth.value;
   }
-  get age(): number {
-    return this.props.dateOfBirth.age;
-  }
+
   get bloodType(): string {
     return this.props.bloodType.value;
   }
