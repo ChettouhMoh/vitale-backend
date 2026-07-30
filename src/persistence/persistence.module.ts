@@ -1,4 +1,4 @@
-import { IPatientRepository } from '@/patient/ports/patient.repository.interface';
+import { IPatientRepository } from '@/patient-record/patient/ports/patient.repository.interface';
 import { Global, Module } from '@nestjs/common';
 import { InMemoryPatientRepository } from './patient/in-memory-patient';
 

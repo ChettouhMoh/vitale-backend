@@ -14,8 +14,8 @@ import {
   ApiCookieAuth,
 } from '@nestjs/swagger';
 import { CreatePatientDto } from './create-patient.dto';
-import { Patient } from '@/patient/domain/patient';
-import { IPatientRepository } from '@/patient/ports/patient.repository.interface';
+import { Patient } from '@/patient-record/patient/domain/patient';
+import { IPatientRepository } from '@/patient-record/patient/ports/patient.repository.interface';
 import { LoggerService } from '@/common/logger/logger.service';
 
 @ApiTags('Patients')

@@ -1,4 +1,4 @@
-import { PatientRecord } from '@/patient/domain/patient';
+import { PatientRecord } from '@/patient-record/patient/domain/patient';
 
 /**
  * Demo patient directory migrated verbatim from the dashboard mock

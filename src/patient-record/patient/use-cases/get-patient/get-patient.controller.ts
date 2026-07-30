@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Inject } from '@nestjs/common';
+import { Controller, Get, Param, Inject, HttpStatus } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -10,7 +10,7 @@ import { IsUUID } from 'class-validator';
 import { PatientResponse } from './get-patient.response';
 import { PatientErrorCode } from '@/common/errors/codes';
 import { DomainError } from '@/common/errors/domain.error';
-import { IPatientRepository } from '@/patient/ports/patient.repository.interface';
+import { IPatientRepository } from '@/patient-record/patient/ports/patient.repository.interface';
 import { LoggerService } from '@/common/logger/logger.service';
 
 class PatientIdParam {
@@ -45,6 +45,7 @@ export class GetPatientController {
       throw new DomainError(
         PatientErrorCode.PATIENT_NOT_FOUND,
         `Patient ${id} not found`,
+        HttpStatus.NOT_FOUND,
       );
     }
 

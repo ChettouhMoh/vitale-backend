@@ -4,7 +4,7 @@ import { ConfigModule } from '@/config/config.module';
 import { LoggerModule } from '@/common/logger/logger.module';
 import { HealthModule } from '@/health/health.module';
 import { HttpExceptionFilter } from '@/common/filters/http-exception.filter';
-import { PatientModule } from './patient/patient.module';
+import { PatientModule } from './patient-record/patient/patient.module';
 import { PersistenceModule } from './persistence/persistence.module';
 
 @Module({

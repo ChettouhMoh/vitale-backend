@@ -112,6 +112,18 @@ export class Patient {
     return `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(name)}`;
   }
 
+  // ─── Domain behaviors ───────────────────────────────────────────────────────
+
+  /** Replace the whole allergy list (mirrors the mock's updateAllergies). */
+  updateAllergies(allergies: string[]): void {
+    this.props.allergies = allergies;
+  }
+
+  /** Replace the whole chronic-disease list (mirrors updateChronicDiseases). */
+  updateChronicDiseases(chronicDiseases: string[]): void {
+    this.props.chronicDiseases = chronicDiseases;
+  }
+
   // ─── Getters ──────────────────────────────────────────────────────────────
 
   get id(): string {

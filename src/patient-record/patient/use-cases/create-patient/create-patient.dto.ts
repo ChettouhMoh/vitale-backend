@@ -13,7 +13,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BloodTypeValue, Gender } from '@/patient/domain';
+import { BloodTypeValue, Gender } from '@/patient-record/patient/domain';
 
 export class EmergencyContactDto {
   @ApiProperty({ example: 'Ahmed Chettouh' })

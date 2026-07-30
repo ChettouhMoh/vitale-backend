@@ -57,9 +57,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   private mapException(exception: unknown, requestId: string): MappedException {
     // 1. Expected business-rule violation — safe to expose code + message.
+    // The throw site chooses the status (404, 409, …); defaults to 400.
     if (exception instanceof DomainError) {
       return {
-        status: HttpStatus.BAD_REQUEST,
+        status: exception.httpStatus,
         code: exception.code,
         message: exception.message,
       };

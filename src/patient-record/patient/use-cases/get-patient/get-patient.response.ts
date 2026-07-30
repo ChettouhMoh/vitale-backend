@@ -1,4 +1,4 @@
-import { Patient } from '@/patient/domain/patient';
+import { Patient } from '@/patient-record/patient/domain/patient';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class EmergencyContactResponse {

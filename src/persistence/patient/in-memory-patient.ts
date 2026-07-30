@@ -1,5 +1,5 @@
-import { Patient } from '@/patient/domain/patient';
-import { IPatientRepository } from '@/patient/ports/patient.repository.interface';
+import { Patient } from '@/patient-record/patient/domain/patient';
+import { IPatientRepository } from '@/patient-record/patient/ports/patient.repository.interface';
 import { Injectable } from '@nestjs/common';
 import { PATIENT_SEED } from './patient.seed';
 

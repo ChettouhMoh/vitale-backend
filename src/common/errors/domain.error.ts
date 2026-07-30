@@ -6,11 +6,17 @@ import { ErrorCode } from './codes';
  *
  * These are safe to expose to clients: both `code` and `message`
  * are surfaced in the HTTP response by the global exception filter.
+ *
+ * `httpStatus` lets a throw site pick the right status (404 not-found,
+ * 409 conflict, …). It defaults to 400 — the common "bad input / rule
+ * violation" case — so most call sites don't need to specify it. Kept as a
+ * plain number so the domain layer stays free of framework imports.
  */
 export class DomainError extends Error {
   constructor(
     public readonly code: ErrorCode,
     message: string,
+    public readonly httpStatus: number = 400,
   ) {
     super(message);
     this.name = 'DomainError';
