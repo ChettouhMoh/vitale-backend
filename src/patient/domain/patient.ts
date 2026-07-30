@@ -1,258 +1,154 @@
 import { v7 as uuidv7 } from 'uuid';
-import {
-  AllergyList,
-  BloodType,
-  BloodTypeValue,
-  ChronicDiseaseList,
-  DateOfBirth,
-  EmergencyContact,
-  NationalIdNumber,
-} from '.';
 
-// ─── Payload shapes ───────────────────────────────────────────────────────────
+// ─── Shared shapes ──────────────────────────────────────────────────────────
+
+export interface EmergencyContact {
+  name: string;
+  phone: string; // E.164, e.g. "+213551234567"
+}
 
 /**
- * Raw primitives from the DTO — structurally validated upstream.
- * VOs only enforce domain-level semantics on top of these.
+ * Raw primitives from the create DTO — already structurally validated upstream
+ * by class-validator. The domain only fills in derived data (id, default avatar).
+ * Field names mirror the dashboard mock (`PatientBasicInfo`).
  */
 export interface CreatePatientPayload {
-  fullName: string;
-  dateOfBirth: string;
+  name: string;
+  dateOfBirth: string; // ISO "YYYY-MM-DD"
   gender: string;
-  bloodType: BloodTypeValue;
-  nationalIdNumber?: string | null; // optional — citizen may add later
+  bloodType: string;
+  nationalId?: string | null;
   avatarUrl?: string | null;
   allergies?: string[];
   chronicDiseases?: string[];
-  emergencyContact: {
-    name: string;
-    phone: string; // pre-merged E.164 from frontend
-  };
+  emergencyContact?: EmergencyContact | null;
 }
 
 /**
- * Shape of a raw DB record passed to restoreExisting().
- * ORM-agnostic — any persistence layer maps its row to this interface.
+ * Shape of a persisted patient row passed to restoreExisting().
+ * Storage-agnostic — any persistence layer maps its record to this interface.
  */
 export interface PatientRecord {
   id: string;
-  fullName: string;
+  name: string;
   dateOfBirth: string;
   gender: string;
   bloodType: string;
-  nationalIdNumber: string | null;
+  nationalId: string | null;
   avatarUrl: string | null;
   allergies: string[];
   chronicDiseases: string[];
-  emergencyContactName: string;
-  emergencyContactPhone: string;
-  createdAt: Date;
+  emergencyContact: EmergencyContact | null;
 }
-
-// ─── Internal props ───────────────────────────────────────────────────────────
 
 interface PatientProps {
-  // Primitives — no domain behavior beyond what the DTO already guaranteed
-  fullName: string;
-  gender: string;
-  avatarUrl: string | null;
-
-  // Value Objects — carry domain behaviors or semantic rules
-  dateOfBirth: DateOfBirth;
-  bloodType: BloodType;
-  nationalIdNumber: NationalIdNumber | null;
-  emergencyContact: EmergencyContact;
-  allergies: AllergyList;
-  chronicDiseases: ChronicDiseaseList;
-
-  createdAt: Date;
-}
-
-// ─── NFC payload type ─────────────────────────────────────────────────────────
-
-export interface NfcEmergencyPayload {
-  patientId: string;
-  fullName: string;
+  name: string;
   dateOfBirth: string;
+  gender: string;
   bloodType: string;
-  isUniversalDonor: boolean;
+  nationalId: string | null;
+  avatarUrl: string | null;
   allergies: string[];
   chronicDiseases: string[];
-  emergencyContact: { name: string; phone: string };
+  emergencyContact: EmergencyContact | null;
 }
 
-// ─── Aggregate root ───────────────────────────────────────────────────────────
+// ─── Aggregate root ─────────────────────────────────────────────────────────
 
 export class Patient {
   private readonly _id: string;
   private props: PatientProps;
 
-  private constructor(props: PatientProps, id?: string) {
-    this._id = id ?? uuidv7();
+  private constructor(props: PatientProps, id: string) {
+    this._id = id;
     this.props = props;
   }
 
-  // ─── Factories ──────────────────────────────────────────────────────────────
-
   /**
    * Creates a brand-new patient from DTO-validated data.
-   * VOs validate domain semantics — any violation throws a DomainError
-   * caught by the global exception filter → 400.
+   * Generates a UUID v7 id and a default avatar when none was supplied.
    */
   static createNew(payload: CreatePatientPayload): Patient {
-    return new Patient({
-      fullName: payload.fullName.trim(),
-      gender: payload.gender,
-      avatarUrl: payload.avatarUrl?.trim() ?? null,
-
-      dateOfBirth: DateOfBirth.create(payload.dateOfBirth),
-      bloodType: BloodType.create(payload.bloodType),
-
-      nationalIdNumber: payload.nationalIdNumber
-        ? NationalIdNumber.create(payload.nationalIdNumber)
-        : null,
-
-      emergencyContact: EmergencyContact.create(
-        payload.emergencyContact.name,
-        payload.emergencyContact.phone,
-      ),
-
-      allergies: AllergyList.from(payload.allergies ?? []),
-      chronicDiseases: ChronicDiseaseList.from(payload.chronicDiseases ?? []),
-
-      createdAt: new Date(),
-    });
+    const name = payload.name.trim();
+    return new Patient(
+      {
+        name,
+        dateOfBirth: payload.dateOfBirth,
+        gender: payload.gender,
+        bloodType: payload.bloodType,
+        nationalId: payload.nationalId?.trim() || null,
+        avatarUrl: payload.avatarUrl?.trim() || Patient.defaultAvatarUrl(name),
+        allergies: payload.allergies ?? [],
+        chronicDiseases: payload.chronicDiseases ?? [],
+        emergencyContact: payload.emergencyContact ?? null,
+      },
+      uuidv7(),
+    );
   }
 
-  /**
-   * Rehydrates a Patient from a DB record.
-   * VOs re-validate on this path — DB data is not DTO-guaranteed.
-   */
+  /** Rehydrates a Patient from a persisted record (id preserved). */
   static restoreExisting(record: PatientRecord): Patient {
     return new Patient(
       {
-        fullName: record.fullName,
+        name: record.name,
+        dateOfBirth: record.dateOfBirth,
         gender: record.gender,
+        bloodType: record.bloodType,
+        nationalId: record.nationalId,
         avatarUrl: record.avatarUrl,
-
-        dateOfBirth: DateOfBirth.create(record.dateOfBirth),
-        bloodType: BloodType.create(record.bloodType),
-
-        nationalIdNumber: record.nationalIdNumber
-          ? NationalIdNumber.create(record.nationalIdNumber)
-          : null,
-
-        emergencyContact: EmergencyContact.fromRecord(
-          record.emergencyContactName,
-          record.emergencyContactPhone,
-        ),
-
-        allergies: AllergyList.from(record.allergies),
-        chronicDiseases: ChronicDiseaseList.from(record.chronicDiseases),
-
-        createdAt: record.createdAt,
+        allergies: record.allergies,
+        chronicDiseases: record.chronicDiseases,
+        emergencyContact: record.emergencyContact,
       },
       record.id,
     );
   }
 
-  // ─── Domain behaviors ────────────────────────────────────────────────────────
-
-  addAllergy(value: string): void {
-    this.props.allergies = this.props.allergies.add(value);
-  }
-
-  removeAllergy(value: string): void {
-    this.props.allergies = this.props.allergies.remove(value);
-  }
-
-  addChronicDisease(value: string): void {
-    this.props.chronicDiseases = this.props.chronicDiseases.add(value);
-  }
-
-  removeChronicDisease(value: string): void {
-    this.props.chronicDiseases = this.props.chronicDiseases.remove(value);
-  }
-
-  updateEmergencyContact(name: string, phone: string): void {
-    this.props.emergencyContact = EmergencyContact.create(name, phone);
-  }
-
-  updateAvatar(url: string | null): void {
-    this.props.avatarUrl = url?.trim() ?? null;
-  }
-
-  linkNin(nin: string): void {
-    this.props.nationalIdNumber = NationalIdNumber.create(nin);
-  }
-
-  // ─── NFC emergency payload ───────────────────────────────────────────────────
-
   /**
-   * Minimal data written to the NFC card.
-   * Fast to read in an emergency — no PII beyond what a first responder needs.
-   * NIN is intentionally excluded.
+   * Default avatar — a DiceBear "initials" tile seeded with the full name, e.g.
+   * https://api.dicebear.com/9.x/initials/svg?seed=Soulaf%20Ayad
    */
-  toNfcEmergencyPayload(): NfcEmergencyPayload {
-    return {
-      patientId: this._id,
-      fullName: this.props.fullName,
-      dateOfBirth: this.props.dateOfBirth.iso,
-      bloodType: this.props.bloodType.value,
-      isUniversalDonor: this.props.bloodType.isUniversalDonor,
-      allergies: this.props.allergies.values,
-      chronicDiseases: this.props.chronicDiseases.values,
-      emergencyContact: {
-        name: this.props.emergencyContact.name,
-        phone: this.props.emergencyContact.phone,
-      },
-    };
+  private static defaultAvatarUrl(name: string): string {
+    return `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(name)}`;
   }
 
-  // ─── Getters ─────────────────────────────────────────────────────────────────
+  // ─── Getters ──────────────────────────────────────────────────────────────
 
   get id(): string {
     return this._id;
   }
-  get fullName(): string {
-    return this.props.fullName;
+  get name(): string {
+    return this.props.name;
+  }
+  get dateOfBirth(): string {
+    return this.props.dateOfBirth;
   }
   get gender(): string {
     return this.props.gender;
   }
+  get bloodType(): string {
+    return this.props.bloodType;
+  }
+  get nationalId(): string | null {
+    return this.props.nationalId;
+  }
   get avatarUrl(): string | null {
     return this.props.avatarUrl;
   }
-  get dateOfBirth(): Date {
-    return this.props.dateOfBirth.value;
-  }
-
-  get bloodType(): string {
-    return this.props.bloodType.value;
-  }
   get allergies(): string[] {
-    return this.props.allergies.values;
+    return this.props.allergies;
   }
   get chronicDiseases(): string[] {
-    return this.props.chronicDiseases.values;
+    return this.props.chronicDiseases;
+  }
+  get emergencyContact(): EmergencyContact | null {
+    return this.props.emergencyContact;
   }
 
-  get nationalIdNumber(): string | null {
-    return this.props.nationalIdNumber?.value ?? null;
-  }
-
-  /** Always use this for logs — never log raw NIN */
-  get maskedNin(): string | null {
-    return this.props.nationalIdNumber?.masked ?? null;
-  }
-
-  get emergencyContactName(): string {
-    return this.props.emergencyContact.name;
-  }
-  get emergencyContactPhone(): string {
-    return this.props.emergencyContact.phone;
-  }
-  get createdAt(): Date {
-    return this.props.createdAt;
+  /** Masked NIN — always use this for logs; never log the raw value. */
+  get maskedNationalId(): string | null {
+    const nin = this.props.nationalId;
+    if (!nin) return null;
+    return `${nin.slice(0, 2)}${'*'.repeat(Math.max(0, nin.length - 4))}${nin.slice(-2)}`;
   }
 }
