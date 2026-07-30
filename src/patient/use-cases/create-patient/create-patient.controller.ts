@@ -39,18 +39,15 @@ export class CreatePatientController {
   @ApiResponse({ status: 409, description: 'NIN already registered' })
   async execute(@Body() dto: CreatePatientDto): Promise<{ id: string }> {
     const patient = Patient.createNew({
-      fullName: dto.fullName,
+      name: dto.name,
       dateOfBirth: dto.dateOfBirth,
       gender: dto.gender,
       bloodType: dto.bloodType,
-      nationalIdNumber: dto.nationalIdNumber ?? null,
+      nationalId: dto.nationalId ?? null,
       avatarUrl: dto.avatarUrl ?? null,
       allergies: dto.allergies ?? [],
       chronicDiseases: dto.chronicDiseases ?? [],
-      emergencyContact: {
-        name: dto.emergencyContact.name,
-        phone: dto.emergencyContact.phone,
-      },
+      emergencyContact: dto.emergencyContact ?? null,
     });
 
     // Unique constraint (NIN) is enforced at the DB level.
@@ -60,7 +57,7 @@ export class CreatePatientController {
 
     this.logger.info('Patient registered', {
       patientId: patient.id,
-      nin: patient.maskedNin, // never log raw NIN
+      nin: patient.maskedNationalId, // never log raw NIN
     });
 
     return { id: patient.id };

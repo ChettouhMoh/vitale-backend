@@ -9,49 +9,48 @@ import {
   ValidateNested,
   MaxLength,
   ArrayMaxSize,
-  IsNotEmptyObject,
   Matches,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BloodTypeValue } from '@/patient/domain';
+import { BloodTypeValue, Gender } from '@/patient/domain';
 
 export class EmergencyContactDto {
-  @ApiProperty({ example: 'Ahmed Bensalem' })
+  @ApiProperty({ example: 'Ahmed Chettouh' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
   name!: string;
 
   /**
-   * Pre-merged E.164 phone number sent by the frontend.
-   * The mobile app combines the country code selector + local number
-   * before sending — no backend splitting needed.
+   * Pre-merged E.164 phone number sent by the frontend (country code + local
+   * number already combined — no backend splitting needed).
    */
-  @ApiProperty({ example: '+213555123456' })
+  @ApiProperty({ example: '+213551234567' })
   @IsString()
   @IsNotEmpty()
   @Matches(/^\+\d{7,15}$/, {
-    message: 'phone must be a valid E.164 number e.g. +213555123456',
+    message: 'phone must be a valid E.164 number e.g. +213551234567',
   })
   phone!: string;
 }
 
 export class CreatePatientDto {
-  @ApiProperty({ example: 'Amira Boudiaf' })
+  @ApiProperty({ example: 'Soulaf Ayad' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
-  fullName!: string;
+  name!: string;
 
-  @ApiProperty({ example: '1990-04-15' })
+  @ApiProperty({ example: '2013-09-05' })
   @IsDateString()
   dateOfBirth!: string;
 
-  @ApiProperty({ example: 'female', enum: ['male', 'female'] })
-  @IsString()
-  @IsNotEmpty()
-  gender!: string;
+  @ApiProperty({ enum: Gender, example: Gender.Female })
+  @IsEnum(Gender, {
+    message: `gender must be one of: ${Object.values(Gender).join(', ')}`,
+  })
+  gender!: Gender;
 
   @ApiProperty({ enum: BloodTypeValue, example: BloodTypeValue.APositive })
   @IsEnum(BloodTypeValue, {
@@ -60,23 +59,24 @@ export class CreatePatientDto {
   bloodType!: BloodTypeValue;
 
   @ApiPropertyOptional({
-    example: '123456789012345678',
-    description: '18-digit Algerian NIN — optional, can be added later',
+    example: '201309054321098765',
+    description: '18-digit national ID — optional, can be added later',
   })
   @IsOptional()
   @IsString()
-  @Matches(/^\d{18}$/, {
-    message: 'nationalIdNumber must be exactly 18 digits',
-  })
-  nationalIdNumber?: string;
+  @Matches(/^\d{18}$/, { message: 'nationalId must be exactly 18 digits' })
+  nationalId?: string;
 
-  @ApiPropertyOptional({ example: 'https://cdn.vitale.dz/avatars/abc.jpg' })
+  @ApiPropertyOptional({
+    example: 'https://api.dicebear.com/9.x/initials/svg?seed=Soulaf%20Ayad',
+    description: 'Optional — a default DiceBear avatar is generated when omitted',
+  })
   @IsOptional()
   @IsUrl({ protocols: ['https'], require_protocol: true })
   @MaxLength(500)
   avatarUrl?: string;
 
-  @ApiPropertyOptional({ example: ['Penicillin', 'Pollen'], type: [String] })
+  @ApiPropertyOptional({ example: ['Penicillin'], type: [String] })
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(30)
@@ -85,7 +85,7 @@ export class CreatePatientDto {
   @MaxLength(100, { each: true })
   allergies?: string[];
 
-  @ApiPropertyOptional({ example: ['Type 2 Diabetes'], type: [String] })
+  @ApiPropertyOptional({ example: ['Asthma'], type: [String] })
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(20)
@@ -94,9 +94,9 @@ export class CreatePatientDto {
   @MaxLength(150, { each: true })
   chronicDiseases?: string[];
 
-  @ApiProperty({ type: EmergencyContactDto })
-  @IsNotEmptyObject()
+  @ApiPropertyOptional({ type: EmergencyContactDto })
+  @IsOptional()
   @ValidateNested()
   @Type(() => EmergencyContactDto)
-  emergencyContact!: EmergencyContactDto;
+  emergencyContact?: EmergencyContactDto;
 }
