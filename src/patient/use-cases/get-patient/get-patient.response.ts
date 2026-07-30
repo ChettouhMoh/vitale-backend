@@ -2,65 +2,63 @@ import { Patient } from '@/patient/domain/patient';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class EmergencyContactResponse {
-  @ApiProperty({ example: 'Ahmed Bensalem' })
+  @ApiProperty({ example: 'Ahmed Chettouh' })
   name!: string;
 
-  @ApiProperty({ example: '+213555123456' })
+  @ApiProperty({ example: '+213551234567' })
   phone!: string;
 }
 
+/**
+ * Patient response — mirrors the dashboard's `PatientBasicInfo` shape so the
+ * frontend can swap its fake call for this endpoint with no mapping.
+ */
 export class PatientResponse {
-  @ApiProperty({ example: '01932b3a-7c1d-7000-8000-123456789abc' })
+  @ApiProperty({ example: '0198b400-0004-7a04-8b04-0000000c0004' })
   id!: string;
 
-  @ApiProperty({ example: 'Amira Boudiaf' })
-  fullName!: string;
+  @ApiProperty({ example: 'Amine Chettouh' })
+  name!: string;
 
-  @ApiProperty({ example: '1990-04-15T00:00:00.000Z' })
+  @ApiProperty({ example: '1980-03-15' })
   dateOfBirth!: string;
 
-  @ApiProperty({ example: 'female' })
+  @ApiProperty({ example: 'male' })
   gender!: string;
 
-  @ApiProperty({ example: 'A+' })
+  @ApiProperty({ example: 'O+' })
   bloodType!: string;
 
+  @ApiPropertyOptional({ example: '198003151234567890', nullable: true })
+  nationalId?: string | null;
+
   @ApiPropertyOptional({
-    example: 'https://cdn.vitale.dz/avatars/abc.jpg',
+    example: 'https://api.dicebear.com/9.x/initials/svg?seed=Amine%20Chettouh',
     nullable: true,
   })
   avatarUrl?: string | null;
 
-  @ApiProperty({ example: ['Penicillin'], type: [String] })
+  @ApiProperty({ example: ['Peanuts', 'Shellfish'], type: [String] })
   allergies!: string[];
 
-  @ApiProperty({ example: ['Type 2 Diabetes'], type: [String] })
+  @ApiProperty({ example: ['Hypertension'], type: [String] })
   chronicDiseases!: string[];
 
-  @ApiProperty({ type: EmergencyContactResponse })
-  emergencyContact!: EmergencyContactResponse;
-
-  @ApiProperty({ example: '2026-06-22T10:00:00.000Z' })
-  createdAt!: string;
-
-  // NIN is intentionally excluded from the API response —
-  // it is sensitive PII and not needed by any consumer of this endpoint.
+  @ApiPropertyOptional({ type: EmergencyContactResponse, nullable: true })
+  emergencyContact?: EmergencyContactResponse | null;
 
   static from(patient: Patient): PatientResponse {
     const res = new PatientResponse();
     res.id = patient.id;
-    res.fullName = patient.fullName;
-    res.dateOfBirth = patient.dateOfBirth.toISOString();
+    res.name = patient.name;
+    res.dateOfBirth = patient.dateOfBirth;
     res.gender = patient.gender;
     res.bloodType = patient.bloodType;
+    res.nationalId = patient.nationalId;
     res.avatarUrl = patient.avatarUrl;
     res.allergies = patient.allergies;
     res.chronicDiseases = patient.chronicDiseases;
-    res.emergencyContact = {
-      name: patient.emergencyContactName,
-      phone: patient.emergencyContactPhone,
-    };
-    res.createdAt = patient.createdAt.toISOString();
+    res.emergencyContact = patient.emergencyContact;
     return res;
   }
 }
