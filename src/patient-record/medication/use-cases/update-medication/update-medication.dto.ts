@@ -12,15 +12,11 @@ import { MedicationRoute, MedicationStatus } from '@/patient-record/medication/d
 /**
  * Partial update — every field optional. Only the fields present in the body
  * are changed; the rest keep their current value.
+ *
+ * `name` is intentionally NOT updatable — a medication's name identifies what it
+ * is; renaming it is not a valid edit.
  */
 export class UpdateMedicationDto {
-  @ApiPropertyOptional({ example: 'Lisinopril' })
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(150)
-  name?: string;
-
   @ApiPropertyOptional({ example: '20mg' })
   @IsOptional()
   @IsString()

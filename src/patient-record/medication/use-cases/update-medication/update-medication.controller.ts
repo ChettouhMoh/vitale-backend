@@ -49,8 +49,8 @@ export class UpdateMedicationController {
     }
 
     // Only the fields present in the DTO are applied (undefined = untouched).
+    // name is not updatable, so it is not part of the DTO.
     medication.applyUpdate({
-      name: dto.name,
       dosage: dto.dosage,
       frequency: dto.frequency,
       route: dto.route,

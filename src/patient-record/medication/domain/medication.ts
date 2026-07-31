@@ -19,7 +19,7 @@ export interface AddMedicationPayload {
  * untouched; an explicit `null` (endDate / instructions) clears it.
  */
 export interface UpdateMedicationPayload {
-  name?: string;
+  // name is intentionally not updatable — it identifies the medication.
   dosage?: string;
   frequency?: string;
   route?: string;
@@ -108,7 +108,6 @@ export class Medication {
    * endDate / instructions clears the field.
    */
   applyUpdate(patch: UpdateMedicationPayload): void {
-    if (patch.name !== undefined) this.props.name = patch.name.trim();
     if (patch.dosage !== undefined) this.props.dosage = patch.dosage.trim();
     if (patch.frequency !== undefined) this.props.frequency = patch.frequency.trim();
     if (patch.route !== undefined) this.props.route = patch.route;
