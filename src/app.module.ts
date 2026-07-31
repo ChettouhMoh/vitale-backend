@@ -7,6 +7,7 @@ import { HttpExceptionFilter } from '@/common/filters/http-exception.filter';
 import { PatientModule } from './patient-record/patient/patient.module';
 import { MedicationModule } from './patient-record/medication/medication.module';
 import { VaccineModule } from './patient-record/vaccine/vaccine.module';
+import { DoctorNoteModule } from './patient-record/doctor-note/doctor-note.module';
 import { PersistenceModule } from './persistence/persistence.module';
 
 @Module({
@@ -23,6 +24,7 @@ import { PersistenceModule } from './persistence/persistence.module';
     PatientModule,
     MedicationModule,
     VaccineModule,
+    DoctorNoteModule,
   ],
   providers: [
     // Global exception filter registered via DI so it can inject LoggerService.
