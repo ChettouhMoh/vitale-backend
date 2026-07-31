@@ -1,0 +1,150 @@
+import { MedicationRecord } from '@/patient-record/medication/domain/medication';
+
+/**
+ * Medications migrated from the dashboard mock
+ * (vitale-dashboard/src/shared/api/medications.api.ts), flattened from the
+ * per-patient map into records carrying their `patientId`. Dates are ISO date
+ * strings. Ids are UUID v7 (the mock's `med-x-y` placeholders were replaced with
+ * real UUID v7 primary keys, matching what `createNew` generates).
+ */
+export const MEDICATION_SEED: MedicationRecord[] = [
+  // ── Amine Chettouh (0198b400-0004…) ──────────────────────────────────────
+  {
+    id: '019fb978-44ca-751e-a5c3-b2a8928720e0',
+    patientId: '0198b400-0004-7a04-8b04-0000000c0004',
+    name: 'Lisinopril',
+    dosage: '10mg',
+    frequency: 'Once daily in the morning',
+    route: 'oral',
+    startDate: '2023-06-01',
+    endDate: null,
+    status: 'active',
+    instructions: 'Monitor blood pressure regularly',
+  },
+  {
+    id: '019fb978-44d0-778b-9f3c-eeee75150256',
+    patientId: '0198b400-0004-7a04-8b04-0000000c0004',
+    name: 'Amoxicillin',
+    dosage: '500mg',
+    frequency: '3 times a day',
+    route: 'oral',
+    startDate: '2024-01-01',
+    endDate: '2024-01-10',
+    status: 'completed',
+    instructions: 'Take with food',
+  },
+  {
+    id: '019fb978-44d0-778b-9f3c-f1567c20eae5',
+    patientId: '0198b400-0004-7a04-8b04-0000000c0004',
+    name: 'Ibuprofen',
+    dosage: '200mg',
+    frequency: 'Every 6 hours as needed',
+    route: 'oral',
+    startDate: '2024-02-15',
+    endDate: null,
+    status: 'active',
+    instructions: 'Do not exceed 1200mg in 24 hours',
+  },
+
+  // ── Soulaf Ayad (0198b400-0001…) ─────────────────────────────────────────
+  {
+    id: '019fb978-44d1-70ea-a812-a184e754e9fd',
+    patientId: '0198b400-0001-7a01-8b01-0000000c0001',
+    name: 'Salbutamol Inhaler',
+    dosage: '100mcg',
+    frequency: '2 puffs as needed',
+    route: 'oral',
+    startDate: '2023-03-10',
+    endDate: null,
+    status: 'active',
+    instructions: 'Inhaled. Use a spacer — for wheezing or before exercise.',
+  },
+  {
+    id: '019fb978-44d1-70ea-a812-a63640066b27',
+    patientId: '0198b400-0001-7a01-8b01-0000000c0001',
+    name: 'Montelukast',
+    dosage: '5mg',
+    frequency: 'Once daily at bedtime',
+    route: 'oral',
+    startDate: '2024-01-20',
+    endDate: null,
+    status: 'active',
+    instructions: 'Chewable tablet. Take every evening for asthma control.',
+  },
+  {
+    id: '019fb978-44d1-70ea-a812-a86c66b54a0e',
+    patientId: '0198b400-0001-7a01-8b01-0000000c0001',
+    name: 'Amoxicillin Suspension',
+    dosage: '250mg/5ml',
+    frequency: 'Twice daily',
+    route: 'oral',
+    startDate: '2024-04-02',
+    endDate: '2024-04-09',
+    status: 'completed',
+    instructions: 'Shake well before use. Finish the full course.',
+  },
+
+  // ── Sofia Bennani (0198b400-0002…) ───────────────────────────────────────
+  {
+    id: '019fb978-44d1-70ea-a812-ae4cdc38306d',
+    patientId: '0198b400-0002-7a02-8b02-0000000c0002',
+    name: 'Levothyroxine',
+    dosage: '75mcg',
+    frequency: 'Once daily on an empty stomach',
+    route: 'oral',
+    startDate: '2022-09-15',
+    endDate: null,
+    status: 'active',
+    instructions: 'Take 30–60 min before breakfast',
+  },
+  {
+    id: '019fb978-44d1-70ea-a812-b0b9aec1fc1c',
+    patientId: '0198b400-0002-7a02-8b02-0000000c0002',
+    name: 'Ferrous Sulfate',
+    dosage: '325mg',
+    frequency: 'Once daily',
+    route: 'oral',
+    startDate: '2024-02-01',
+    endDate: null,
+    status: 'paused',
+    instructions: 'Take with vitamin C. Paused due to GI upset.',
+  },
+
+  // ── Yanis Meziane (0198b400-0003…) ───────────────────────────────────────
+  {
+    id: '019fb978-44d1-70ea-a812-b73f64a6585a',
+    patientId: '0198b400-0003-7a03-8b03-0000000c0003',
+    name: 'Insulin Glargine',
+    dosage: '12 units',
+    frequency: 'Once daily at bedtime',
+    route: 'injection',
+    startDate: '2022-09-01',
+    endDate: null,
+    status: 'active',
+    instructions: 'Basal insulin. Rotate injection sites.',
+  },
+  {
+    id: '019fb978-44d2-714a-b4b2-eb9c8a75655e',
+    patientId: '0198b400-0003-7a03-8b03-0000000c0003',
+    name: 'Insulin Aspart',
+    dosage: 'Per carb ratio',
+    frequency: 'With each meal',
+    route: 'injection',
+    startDate: '2022-09-01',
+    endDate: null,
+    status: 'active',
+    instructions: 'Mealtime insulin. Dose by carbohydrate counting.',
+  },
+  {
+    id: '019fb978-44d3-74ae-b84a-a457185b19fe',
+    patientId: '0198b400-0003-7a03-8b03-0000000c0003',
+    name: 'Cetirizine',
+    dosage: '10mg',
+    frequency: 'Once daily during pollen season',
+    route: 'oral',
+    startDate: '2024-03-15',
+    endDate: null,
+    status: 'paused',
+    instructions: 'For seasonal allergic rhinitis. Resume in spring.',
+  },
+];
