@@ -1,11 +1,13 @@
 export { AuthErrorCode } from './auth.errors';
 export { DoctorErrorCode } from './doctor.errors';
 export { PatientErrorCode } from './patient.errors';
+export { MedicationErrorCode } from './medication.errors';
 export { NfcErrorCode } from './nfc.errors';
 
 import { AuthErrorCode } from './auth.errors';
 import { DoctorErrorCode } from './doctor.errors';
 import { PatientErrorCode } from './patient.errors';
+import { MedicationErrorCode } from './medication.errors';
 import { NfcErrorCode } from './nfc.errors';
 
 /**
@@ -16,4 +18,5 @@ export type ErrorCode =
   | AuthErrorCode
   | DoctorErrorCode
   | PatientErrorCode
+  | MedicationErrorCode
   | NfcErrorCode;
