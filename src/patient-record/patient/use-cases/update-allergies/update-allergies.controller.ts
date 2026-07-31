@@ -7,7 +7,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { IsUUID } from 'class-validator';
+import { IsString } from 'class-validator';
 import { UpdateAllergiesDto } from './update-allergies.dto';
 import { PatientErrorCode } from '@/common/errors/codes';
 import { DomainError } from '@/common/errors/domain.error';
@@ -15,7 +15,7 @@ import { IPatientRepository } from '@/patient-record/patient/ports/patient.repos
 import { LoggerService } from '@/common/logger/logger.service';
 
 class PatientIdParam {
-  @IsUUID('7', { message: 'id must be a valid UUID v7' })
+  @IsString()
   id!: string;
 }
 

@@ -16,7 +16,8 @@ export const PATIENT_SEED: PatientRecord[] = [
     gender: 'male',
     bloodType: 'O+',
     nationalId: '198003151234567890',
-    avatarUrl: 'https://api.dicebear.com/9.x/initials/svg?seed=Amine%20Chettouh',
+    avatarUrl:
+      'https://api.dicebear.com/9.x/initials/svg?seed=Amine%20Chettouh',
     allergies: ['Peanuts', 'Shellfish'],
     chronicDiseases: ['Hypertension'],
     emergencyContact: { name: 'Ahmed Chettouh', phone: '+213551234567' },
@@ -28,7 +29,7 @@ export const PATIENT_SEED: PatientRecord[] = [
     gender: 'female',
     bloodType: 'A+',
     nationalId: '201309054321098765',
-    avatarUrl: 'https://api.dicebear.com/9.x/initials/svg?seed=Lina%20Haddad',
+    avatarUrl: 'https://api.dicebear.com/9.x/initials/svg?seed=Soulaf%20Ayad',
     allergies: ['Penicillin'],
     chronicDiseases: ['Asthma'],
     emergencyContact: { name: 'Nadia Haddad', phone: '+213770112233' },
