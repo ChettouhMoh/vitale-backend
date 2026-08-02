@@ -4,6 +4,7 @@ export { PatientErrorCode } from './patient.errors';
 export { MedicationErrorCode } from './medication.errors';
 export { VaccineErrorCode } from './vaccine.errors';
 export { DoctorNoteErrorCode } from './doctor-note.errors';
+export { AttachmentErrorCode } from './attachment.errors';
 export { NfcErrorCode } from './nfc.errors';
 
 import { AuthErrorCode } from './auth.errors';
@@ -12,6 +13,7 @@ import { PatientErrorCode } from './patient.errors';
 import { MedicationErrorCode } from './medication.errors';
 import { VaccineErrorCode } from './vaccine.errors';
 import { DoctorNoteErrorCode } from './doctor-note.errors';
+import { AttachmentErrorCode } from './attachment.errors';
 import { NfcErrorCode } from './nfc.errors';
 
 /**
@@ -25,4 +27,5 @@ export type ErrorCode =
   | MedicationErrorCode
   | VaccineErrorCode
   | DoctorNoteErrorCode
+  | AttachmentErrorCode
   | NfcErrorCode;
