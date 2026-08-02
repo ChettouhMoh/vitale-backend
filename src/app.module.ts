@@ -8,6 +8,7 @@ import { PatientModule } from './patient-record/patient/patient.module';
 import { MedicationModule } from './patient-record/medication/medication.module';
 import { VaccineModule } from './patient-record/vaccine/vaccine.module';
 import { DoctorNoteModule } from './patient-record/doctor-note/doctor-note.module';
+import { AttachmentModule } from './attachment/attachment.module';
 import { PersistenceModule } from './persistence/persistence.module';
 
 @Module({
@@ -25,6 +26,7 @@ import { PersistenceModule } from './persistence/persistence.module';
     MedicationModule,
     VaccineModule,
     DoctorNoteModule,
+    AttachmentModule,
   ],
   providers: [
     // Global exception filter registered via DI so it can inject LoggerService.
