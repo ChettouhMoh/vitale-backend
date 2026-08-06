@@ -1,6 +1,3 @@
-export enum DoctorErrorCode {
-  DOCTOR_NOT_FOUND = 'DOCTOR_NOT_FOUND',
-  EMAIL_ALREADY_EXISTS = 'EMAIL_ALREADY_EXISTS',
-  KYC_ALREADY_SUBMITTED = 'KYC_ALREADY_SUBMITTED',
-  KYC_NOT_VERIFIED = 'KYC_NOT_VERIFIED',
-}
+// The doctor bounded context owns its error codes; re-exported here so they
+// join the global `ErrorCode` union without a second declaration.
+export { DoctorErrorCode } from '@/doctor/domain/doctor.errors';
