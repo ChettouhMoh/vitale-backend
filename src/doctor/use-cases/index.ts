@@ -1,0 +1,14 @@
+export { CreateDoctorController } from './create-doctor';
+export { GetDoctorController } from './get-doctor';
+export { GetDoctorProfileController } from './get-doctor-profile';
+export { UpdateIdentityController } from './update-identity';
+export { UpdateContactController } from './update-contact';
+export { UpdateCredentialsController } from './update-credentials';
+export { UpdateAffiliationController } from './update-affiliation';
+export { UpdateBioController } from './update-bio';
+export { UpdateExpertiseController } from './update-expertise';
+export { UpdateLanguagesController } from './update-languages';
+export { UpdateEducationController } from './update-education';
+export { UpdateScheduleController } from './update-schedule';
+export { SubmitVerificationController } from './submit-verification';
+export { DecideVerificationController } from './decide-verification';
