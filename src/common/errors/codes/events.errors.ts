@@ -1,0 +1,9 @@
+/**
+ * EventsErrorCode — authoritative source for the shared events infrastructure.
+ */
+export enum EventsErrorCode {
+  INVALID_EVENT_NAME = 'INVALID_EVENT_NAME',
+  EVENT_ALREADY_PUBLISHED = 'EVENT_ALREADY_PUBLISHED',
+  EVENT_PAYLOAD_NOT_SERIALISABLE = 'EVENT_PAYLOAD_NOT_SERIALISABLE',
+  HANDLER_REGISTRATION_FAILED = 'HANDLER_REGISTRATION_FAILED',
+}
