@@ -10,6 +10,7 @@ import { VaccineModule } from './patient-record/vaccine/vaccine.module';
 import { DoctorNoteModule } from './patient-record/doctor-note/doctor-note.module';
 import { AttachmentModule } from './attachment/attachment.module';
 import { DoctorModule } from './doctor/doctor.module';
+import { EventsModule } from './shared/events/events.module';
 import { PersistenceModule } from './persistence/persistence.module';
 
 @Module({
@@ -22,7 +23,9 @@ import { PersistenceModule } from './persistence/persistence.module';
     HealthModule,
     // 4. Persistence Layer (repositories, adapters, etc...) and It's GLobal
     PersistenceModule,
-    // 5. Domain modules.
+    // 5. Shared events infrastructure (transactional outbox) — global.
+    EventsModule,
+    // 6. Domain modules.
     PatientModule,
     MedicationModule,
     VaccineModule,
