@@ -39,6 +39,12 @@ import * as Joi from 'joi';
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),
+
+        // Shared events infrastructure (transactional outbox dispatcher).
+        EVENTS_POLL_INTERVAL_MS: Joi.number().default(1000),
+        EVENTS_BATCH_SIZE: Joi.number().default(20),
+        EVENTS_MAX_ATTEMPTS: Joi.number().default(5),
+        EVENTS_DISPATCHER_ENABLED: Joi.boolean().default(true),
       }),
       validationOptions: {
         // Surface every problem at once rather than failing on the first.
