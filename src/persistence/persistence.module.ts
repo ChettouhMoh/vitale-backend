@@ -12,6 +12,7 @@ import {
   IDoctorEducationRepository,
   IDoctorScheduleRepository,
 } from '@/doctor/ports';
+import { IOutboxRepository } from '@/shared/events/ports';
 import { Global, Module } from '@nestjs/common';
 import { InMemoryPatientRepository } from './patient/in-memory-patient';
 import { InMemoryMedicationRepository } from './medication/in-memory-medication';
@@ -25,6 +26,7 @@ import { InMemoryDoctorExpertiseRepository } from './doctor/in-memory-doctor-exp
 import { InMemoryDoctorLanguagesRepository } from './doctor/in-memory-doctor-languages.repository';
 import { InMemoryDoctorEducationRepository } from './doctor/in-memory-doctor-education.repository';
 import { InMemoryDoctorScheduleRepository } from './doctor/in-memory-doctor-schedule.repository';
+import { InMemoryOutboxRepository } from './events/in-memory-outbox.repository';
 
 // make it globale module so we can access the repositories in any module without importing it explicitly
 @Global()
@@ -58,6 +60,8 @@ import { InMemoryDoctorScheduleRepository } from './doctor/in-memory-doctor-sche
       provide: IDoctorScheduleRepository,
       useClass: InMemoryDoctorScheduleRepository,
     },
+    // Transactional outbox (shared events infrastructure).
+    { provide: IOutboxRepository, useClass: InMemoryOutboxRepository },
   ],
   exports: [
     // Export the repositories so they can be used in other modules
@@ -73,6 +77,7 @@ import { InMemoryDoctorScheduleRepository } from './doctor/in-memory-doctor-sche
     IDoctorLanguagesRepository,
     IDoctorEducationRepository,
     IDoctorScheduleRepository,
+    IOutboxRepository,
   ],
 })
 export class PersistenceModule {}
