@@ -11,6 +11,7 @@ import { DoctorNoteModule } from './patient-record/doctor-note/doctor-note.modul
 import { AttachmentModule } from './attachment/attachment.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { EventsModule } from './shared/events/events.module';
+import { NotificationModule } from './notification/notification.module';
 import { PersistenceModule } from './persistence/persistence.module';
 
 @Module({
@@ -32,6 +33,8 @@ import { PersistenceModule } from './persistence/persistence.module';
     DoctorNoteModule,
     AttachmentModule,
     DoctorModule,
+    // Subscribes to domain events; imported so its handler providers exist.
+    NotificationModule,
   ],
   providers: [
     // Global exception filter registered via DI so it can inject LoggerService.
