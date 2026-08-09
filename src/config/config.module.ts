@@ -45,6 +45,18 @@ import * as Joi from 'joi';
         EVENTS_BATCH_SIZE: Joi.number().default(20),
         EVENTS_MAX_ATTEMPTS: Joi.number().default(5),
         EVENTS_DISPATCHER_ENABLED: Joi.boolean().default(true),
+
+        // Notification context — SMTP (Gmail in development; see .env.example).
+        SMTP_HOST: Joi.string().required(),
+        SMTP_PORT: Joi.number().default(465),
+        SMTP_SECURE: Joi.boolean().default(true),
+        SMTP_USER: Joi.string().required(),
+        SMTP_PASSWORD: Joi.string().required(),
+        MAIL_FROM_NAME: Joi.string().default('Vitale'),
+        MAIL_FROM_ADDRESS: Joi.string().required(),
+        // When false, the channel adapter logs instead of sending (the
+        // Notification record is still created).
+        NOTIFICATIONS_ENABLED: Joi.boolean().default(true),
       }),
       validationOptions: {
         // Surface every problem at once rather than failing on the first.
