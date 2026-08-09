@@ -6,6 +6,14 @@ process.env.DATABASE_URL =
 process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
 process.env.JWT_SECRET =
   process.env.JWT_SECRET ?? 'test-secret-that-is-at-least-32-chars-long';
+// Notification/SMTP config is required on boot; provide inert defaults and keep
+// sending disabled so the app compiles in the test environment.
+process.env.NOTIFICATIONS_ENABLED = process.env.NOTIFICATIONS_ENABLED ?? 'false';
+process.env.SMTP_HOST = process.env.SMTP_HOST ?? 'smtp.example.com';
+process.env.SMTP_USER = process.env.SMTP_USER ?? 'test@example.com';
+process.env.SMTP_PASSWORD = process.env.SMTP_PASSWORD ?? 'test-password';
+process.env.MAIL_FROM_ADDRESS =
+  process.env.MAIL_FROM_ADDRESS ?? 'no-reply@example.com';
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
