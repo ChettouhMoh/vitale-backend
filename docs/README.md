@@ -11,8 +11,10 @@ it is.
 | Document | What it covers | Who should read it |
 | --- | --- | --- |
 | [architecture/events.md](architecture/events.md) | The shared events infrastructure: how to emit events, write handlers, the idempotency rule, retry/dead-letter policy, configuration, and known gaps. | Anyone emitting an event, writing a handler, or debugging delivery. |
+| [architecture/notification.md](architecture/notification.md) | The notification context: event → handler → service → channel flow, adding a notification type, locale/RTL handling, idempotency, Gmail SMTP setup, and known gaps. | Anyone adding a notification, editing a template, or configuring SMTP. |
 | [architecture/decisions/0003-transactional-outbox.md](architecture/decisions/0003-transactional-outbox.md) | Why events go through a transactional outbox instead of a direct call or a direct queue write. | Anyone questioning the design, or extending the eventing model. |
 | [architecture/decisions/0004-in-process-dispatch-before-bullmq.md](architecture/decisions/0004-in-process-dispatch-before-bullmq.md) | Why dispatch is an in-process polling loop today, and the exact plan to migrate to BullMQ later. | Anyone about to add Redis/BullMQ, or wondering why retry is hand-rolled. |
+| [architecture/decisions/0005-notification-channel-abstraction.md](architecture/decisions/0005-notification-channel-abstraction.md) | Why three channel ports exist with one implemented, why Gmail is the first provider, and why the idempotency key is (eventId, type, channel). | Anyone adding a channel/provider or touching the idempotency guard. |
 | [runbooks/events-troubleshooting.md](runbooks/events-troubleshooting.md) | Symptom-first operational guide for events that don't fire, run twice, get stuck, or fail tests. | On-call / whoever is debugging a live or CI problem. |
 
 ## Conventions
