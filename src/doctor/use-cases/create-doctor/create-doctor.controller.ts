@@ -11,6 +11,7 @@ import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { CreateDoctorDto, CreateDoctorResponse } from './create-doctor.dto';
 import { Doctor } from '@/doctor/domain';
 import { IDoctorRepository } from '@/doctor/ports';
+import { IEventBus } from '@/shared/events/ports';
 import { LoggerService } from '@/common/logger/logger.service';
 
 @ApiTags('Doctors')
@@ -19,6 +20,8 @@ export class CreateDoctorController {
   constructor(
     @Inject(IDoctorRepository)
     private readonly doctors: IDoctorRepository,
+    @Inject(IEventBus)
+    private readonly events: IEventBus,
     private readonly logger: LoggerService,
   ) {}
 
@@ -49,6 +52,23 @@ export class CreateDoctorController {
     await this.doctors.save(doctor);
 
     this.logger.info('Doctor registered', { doctorId: doctor.id });
+
+    // Publish the fact — the notification context consumes `doctor.registered`
+    // and sends the email-verification message. We record it durably (outbox)
+    // and return; delivery happens out-of-band, so a slow/failed SMTP never
+    // blocks or fails signup.
+    //
+    // Stand-ins until the auth module exists: `credentialId` (the verification
+    // token identity) is the doctor id, and `locale` defaults to French — the
+    // aggregate carries neither yet. The email link is therefore a placeholder,
+    // which is fine for exercising the events → notification pipeline.
+    await this.events.emit('doctor.registered', {
+      doctorId: doctor.id,
+      credentialId: doctor.id,
+      email: doctor.email,
+      fullName: doctor.fullName,
+      locale: 'en',
+    });
 
     return { id: doctor.id };
   }
