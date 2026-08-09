@@ -41,6 +41,22 @@ bullet points; keep this file backend-specific (no dashboard/frontend notes).
   for patient/medication/vaccine; separate Mongo store for doctor-notes (fast read/write, denormalized).
   The ports (`I*Repository`) already isolate this — only `src/persistence/**` should change.
 
+## Localization
+
+- **Resolve the request locale from a header instead of hardcoding it.** `create-doctor.controller`
+  currently passes a fixed `locale` into the `doctor.registered` event, so every verification email
+  is one language. Since notifications are sent **async** (outbox dispatcher — no request in scope at
+  send time), the locale must be captured at request time and carried in the event payload; it can't be
+  detected later. Add a small `resolveLocale(req)` helper with the precedence **`X-Locale` header →
+  `Accept-Language` → default `'fr'`**, validated against the supported set (`en` / `fr` / `ar`). The
+  dashboard sends `X-Locale` explicitly (see its backlog) because that reflects the language the user
+  *picked* in the app, which `Accept-Language` (browser/OS install language) does not. Use the resolved
+  value in the emit **and** persist it on the aggregate.
+- **Store `locale` on the `Doctor` aggregate.** Add a `locale` field (default `'fr'`) set at signup from
+  the resolved request locale. Authenticated/async notifications (`doctor.kyc_approved`, etc.) then read
+  `doctor.locale` from the aggregate — no header needed once the user exists; the aggregate is the source
+  of truth for every future notification.
+
 ## Default Seeding
 
 - **Default vaccines sseding.** when patient created for the first time in system that must fire an event
