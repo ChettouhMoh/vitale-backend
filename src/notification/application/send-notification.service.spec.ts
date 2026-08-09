@@ -20,15 +20,15 @@ const rendered = { subject: 'S', html: '<p>hi</p>', text: 'hi' };
 
 function makeService() {
   const repo = {
-    findByEventAndType: jest.fn(),
-    save: jest.fn(),
-    findById: jest.fn(),
-    findFailed: jest.fn(),
+    findByEventAndType: jest.fn<INotificationRepository['findByEventAndType']>(),
+    save: jest.fn<INotificationRepository['save']>(),
+    findById: jest.fn<INotificationRepository['findById']>(),
+    findFailed: jest.fn<INotificationRepository['findFailed']>(),
   };
-  const renderer = { render: jest.fn() };
-  const email = { send: jest.fn() };
-  const sms = { send: jest.fn() };
-  const push = { send: jest.fn() };
+  const renderer = { render: jest.fn<ITemplateRenderer['render']>() };
+  const email = { send: jest.fn<IEmailChannel['send']>() };
+  const sms = { send: jest.fn<ISmsChannel['send']>() };
+  const push = { send: jest.fn<IPushChannel['send']>() };
   const logger = {
     info: jest.fn(),
     warn: jest.fn(),
