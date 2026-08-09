@@ -13,6 +13,7 @@ import {
   IDoctorScheduleRepository,
 } from '@/doctor/ports';
 import { IOutboxRepository } from '@/shared/events/ports';
+import { INotificationRepository } from '@/notification/ports';
 import { Global, Module } from '@nestjs/common';
 import { InMemoryPatientRepository } from './patient/in-memory-patient';
 import { InMemoryMedicationRepository } from './medication/in-memory-medication';
@@ -27,6 +28,7 @@ import { InMemoryDoctorLanguagesRepository } from './doctor/in-memory-doctor-lan
 import { InMemoryDoctorEducationRepository } from './doctor/in-memory-doctor-education.repository';
 import { InMemoryDoctorScheduleRepository } from './doctor/in-memory-doctor-schedule.repository';
 import { InMemoryOutboxRepository } from './events/in-memory-outbox.repository';
+import { InMemoryNotificationRepository } from './notification/in-memory-notification.repository';
 
 // make it globale module so we can access the repositories in any module without importing it explicitly
 @Global()
@@ -62,6 +64,10 @@ import { InMemoryOutboxRepository } from './events/in-memory-outbox.repository';
     },
     // Transactional outbox (shared events infrastructure).
     { provide: IOutboxRepository, useClass: InMemoryOutboxRepository },
+    {
+      provide: INotificationRepository,
+      useClass: InMemoryNotificationRepository,
+    },
   ],
   exports: [
     // Export the repositories so they can be used in other modules
@@ -78,6 +84,7 @@ import { InMemoryOutboxRepository } from './events/in-memory-outbox.repository';
     IDoctorEducationRepository,
     IDoctorScheduleRepository,
     IOutboxRepository,
+    INotificationRepository,
   ],
 })
 export class PersistenceModule {}
