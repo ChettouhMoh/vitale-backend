@@ -11,10 +11,11 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { Public } from '@/auth/decorators';
-import { AuthErrorCode, TokenPurpose } from '@/auth/domain';
+import { TokenPurpose } from '@/auth/domain';
 import { ITokenIssuer } from '@/auth/ports';
 import { AuthKernel, OAuthProviderRegistry } from '@/auth/kernel';
 import { DomainError } from '@/common/errors/domain.error';
+import { AuthErrorCode } from '@/common/errors/codes/auth.errors';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -32,7 +33,9 @@ export class OAuthCallbackController {
 
   @Get('oauth/:provider/callback')
   @Public()
-  @ApiOperation({ summary: 'Handle the provider redirect back (login / signup / link)' })
+  @ApiOperation({
+    summary: 'Handle the provider redirect back (login / signup / link)',
+  })
   @ApiResponse({ status: 302, description: 'Redirect into the app' })
   async callback(
     @Param('provider') providerName: string,
@@ -45,7 +48,10 @@ export class OAuthCallbackController {
     const statePayload = this.kernel.readStateCookie(
       req.cookies?.[this.kernel.stateCookieName()],
     );
-    if (statePayload.state !== state || statePayload.provider !== providerName) {
+    if (
+      statePayload.state !== state ||
+      statePayload.provider !== providerName
+    ) {
       throw new DomainError(
         AuthErrorCode.OAUTH_STATE_MISMATCH,
         'OAuth state does not match',

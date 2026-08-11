@@ -11,9 +11,10 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { Public } from '@/auth/decorators';
 import { AuthKernel } from '@/auth/kernel';
-import { AuthErrorCode, SessionPolicy, TokenPurpose } from '@/auth/domain';
+import { SessionPolicy, TokenPurpose } from '@/auth/domain';
 import { ITokenIssuer } from '@/auth/ports';
 import { DomainError } from '@/common/errors/domain.error';
+import { AuthErrorCode } from '@/common/errors/codes/auth.errors';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -30,7 +31,9 @@ export class RefreshSessionController {
   // sends here.
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Mint a fresh access token from the refresh cookie' })
+  @ApiOperation({
+    summary: 'Mint a fresh access token from the refresh cookie',
+  })
   @ApiResponse({ status: 200, description: 'New session cookies set' })
   @ApiResponse({ status: 401, description: 'Missing or invalid refresh token' })
   async execute(

@@ -13,7 +13,8 @@ import type { Request, Response } from 'express';
 import { CompleteOAuthSignupDto } from './complete-oauth-signup.dto';
 import { AuthPrincipalResponse } from '../doctor-login';
 import { Public } from '@/auth/decorators';
-import { AuthErrorCode, TokenPurpose } from '@/auth/domain';
+import { TokenPurpose } from '@/auth/domain';
+import { AuthErrorCode } from '@/common/errors/codes/auth.errors';
 import {
   IDoctorOAuthLinkRepository,
   IDoctorRegistration,
@@ -43,7 +44,10 @@ export class CompleteOAuthSignupController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Finish OAuth signup with specialty + license' })
   @ApiResponse({ status: 201, type: AuthPrincipalResponse })
-  @ApiResponse({ status: 401, description: 'Registration ticket missing/invalid/expired' })
+  @ApiResponse({
+    status: 401,
+    description: 'Registration ticket missing/invalid/expired',
+  })
   async execute(
     @Body() dto: CompleteOAuthSignupDto,
     @Req() req: Request & { cookies?: Record<string, string> },

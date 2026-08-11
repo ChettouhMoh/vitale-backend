@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IOAuthProvider } from '@/auth/ports';
-import { AuthErrorCode } from '@/auth/domain';
+import { AuthErrorCode } from '@/common/errors/codes/auth.errors';
 import { DomainError } from '@/common/errors/domain.error';
 
 /** DI token for the list of enabled OAuth provider adapters. */

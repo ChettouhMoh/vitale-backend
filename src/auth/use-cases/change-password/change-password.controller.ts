@@ -9,10 +9,11 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChangePasswordDto } from './change-password.dto';
 import { CurrentUser } from '@/auth/decorators';
-import { AuthErrorCode, type AuthPrincipal } from '@/auth/domain';
+import { type AuthPrincipal } from '@/auth/domain';
 import { IAuthSubjectStore, IPasswordHasher } from '@/auth/ports';
 import { IEventBus } from '@/shared/events/ports';
 import { DomainError } from '@/common/errors/domain.error';
+import { AuthErrorCode } from '@/common/errors/codes/auth.errors';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })

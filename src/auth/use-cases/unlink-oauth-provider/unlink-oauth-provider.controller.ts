@@ -6,13 +6,11 @@ import {
   Inject,
   Param,
 } from '@nestjs/common';
+import { AuthErrorCode } from '@/common/errors/codes/auth.errors';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '@/auth/decorators';
-import { AuthErrorCode, type AuthPrincipal } from '@/auth/domain';
-import {
-  IAuthSubjectStore,
-  IDoctorOAuthLinkRepository,
-} from '@/auth/ports';
+import { type AuthPrincipal } from '@/auth/domain';
+import { IAuthSubjectStore, IDoctorOAuthLinkRepository } from '@/auth/ports';
 import { DomainError } from '@/common/errors/domain.error';
 
 @ApiTags('Auth')

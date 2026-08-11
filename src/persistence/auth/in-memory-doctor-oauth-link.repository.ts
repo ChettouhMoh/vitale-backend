@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { v7 as uuidv7 } from 'uuid';
 import { DoctorOAuthLink, IDoctorOAuthLinkRepository } from '@/auth/ports';
-import { AuthErrorCode } from '@/auth/domain';
+import { AuthErrorCode } from '@/common/errors/codes/auth.errors';
 import { DomainError } from '@/common/errors/domain.error';
 
 /**
@@ -10,9 +10,7 @@ import { DomainError } from '@/common/errors/domain.error';
  * id; lookups scan (fine for in-memory — a real adapter indexes the columns).
  */
 @Injectable()
-export class InMemoryDoctorOAuthLinkRepository
-  implements IDoctorOAuthLinkRepository
-{
+export class InMemoryDoctorOAuthLinkRepository implements IDoctorOAuthLinkRepository {
   private readonly store = new Map<string, DoctorOAuthLink>();
 
   async link(
@@ -47,7 +45,10 @@ export class InMemoryDoctorOAuthLinkRepository
     providerUserId: string,
   ): Promise<DoctorOAuthLink | null> {
     for (const link of this.store.values()) {
-      if (link.provider === provider && link.providerUserId === providerUserId) {
+      if (
+        link.provider === provider &&
+        link.providerUserId === providerUserId
+      ) {
         return link;
       }
     }

@@ -1,7 +1,7 @@
 import { describe, it, expect, jest } from '@jest/globals';
 import { ConfigService } from '@nestjs/config';
 import { AuthKernel } from './auth-kernel.service';
-import { AuthErrorCode, Role } from '@/auth/domain';
+import { Role } from '@/auth/domain';
 import type {
   AuthSubject,
   IAuthSubjectStore,
@@ -10,7 +10,7 @@ import type {
 } from '@/auth/ports';
 import type { IEventBus } from '@/shared/events/ports';
 import { DomainError } from '@/common/errors/domain.error';
-
+import { AuthErrorCode } from '@/common/errors/codes/auth.errors';
 /**
  * The attack: someone signs up with the victim's email, never verifies, and
  * waits. When the victim later signs in with Google, a naive merge would keep
