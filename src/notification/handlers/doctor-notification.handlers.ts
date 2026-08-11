@@ -17,22 +17,18 @@ export class DoctorNotificationHandlers {
     payload: DomainEventPayload<'doctor.registered'>,
     eventId: string,
   ): Promise<void> {
-    // A freshly-registered doctor must verify their email before they can log
-    // in, so registration sends the VERIFICATION email — not a welcome.
-    //
-    // TODO(auth): the real verification link + expiry belong to the auth
-    // module's token flow. Once auth emits `auth.email_verification_requested`
-    // (which carries the real link), move this there and revert doctor.registered
-    // to a welcome (or drop it) so a verification email is never sent twice.
-    const verificationLink = `https://app.vitale.dz/verify?token=${payload.credentialId}`;
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
+    // Now that the auth module owns the token flow, the VERIFICATION email is
+    // driven by `auth.email_verification_requested` (which carries the real,
+    // signed link). So `doctor.registered` sends only a WELCOME — sending a
+    // verification here too would deliver two emails per signup. OAuth signups
+    // also emit `doctor.registered` but are already verified, so a welcome is
+    // exactly right for them.
     await this.sender.send({
       eventId,
-      type: NotificationTypeValue.EmailVerification,
+      type: NotificationTypeValue.DoctorWelcome,
       recipient: payload.email,
       locale: payload.locale,
-      data: { verificationLink, expiresAt },
+      data: { fullName: payload.fullName },
     });
   }
 
