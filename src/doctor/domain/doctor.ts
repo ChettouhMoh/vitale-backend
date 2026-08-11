@@ -16,17 +16,23 @@ import {
  */
 export interface CreateDoctorPayload {
   email: string;
-  passwordHash: string;
+  /** NULL for OAuth-only doctors — they never set a password. */
+  passwordHash: string | null;
   fullName: string;
   phone: string | null;
   specialty: string;
+  /** Optional at signup; OAuth registration supplies it up-front. */
+  medicalLicenseNumber?: string | null;
+  /** OAuth registration passes `true` (provider proved it); defaults to false. */
+  emailVerified?: boolean;
 }
 
 /** Persisted doctor row — storage-agnostic; ids are opaque strings. */
 export interface DoctorRecord {
   id: string;
   email: string;
-  passwordHash: string;
+  passwordHash: string | null;
+  emailVerified: boolean;
   fullName: string;
   phone: string | null;
   avatarAttachmentId: string | null;
@@ -46,7 +52,8 @@ export interface DoctorRecord {
 
 interface DoctorProps {
   email: string;
-  passwordHash: string;
+  passwordHash: string | null;
+  emailVerified: boolean;
   fullName: string;
   phone: string | null;
   avatarAttachmentId: string | null;
@@ -83,11 +90,12 @@ export class Doctor {
       {
         email: payload.email.trim().toLowerCase(),
         passwordHash: payload.passwordHash,
+        emailVerified: payload.emailVerified ?? false,
         fullName: payload.fullName.trim(),
         phone: payload.phone?.trim() || null,
         avatarAttachmentId: null,
         specialty: payload.specialty.trim(),
-        medicalLicenseNumber: null,
+        medicalLicenseNumber: payload.medicalLicenseNumber?.trim() || null,
         practiceStartYear: null,
         affiliation: PracticeAffiliation.create(
           null,
@@ -112,6 +120,7 @@ export class Doctor {
       {
         email: record.email,
         passwordHash: record.passwordHash,
+        emailVerified: record.emailVerified,
         fullName: record.fullName,
         phone: record.phone,
         avatarAttachmentId: record.avatarAttachmentId,
@@ -141,6 +150,7 @@ export class Doctor {
       id: this._id,
       email: this.props.email,
       passwordHash: this.props.passwordHash,
+      emailVerified: this.props.emailVerified,
       fullName: this.props.fullName,
       phone: this.props.phone,
       avatarAttachmentId: this.props.avatarAttachmentId,
@@ -228,7 +238,33 @@ export class Doctor {
     this.touch();
   }
 
-  // ─── Getters (passwordHash intentionally NOT exposed) ────────────────────────
+  // ─── Auth-owned credential fields ───────────────────────────────────────────
+  // The auth context owns these even though they live on the doctor row; the
+  // `DoctorAuthSubjectStore` adapter drives them through these mutators.
+
+  /** Set or replace the password hash (first set, or a reset). */
+  setPasswordHash(hash: string): void {
+    this.props.passwordHash = hash;
+    this.touch();
+  }
+
+  /** Destroy the password — pre-hijacking defence / becoming OAuth-only. */
+  clearPasswordHash(): void {
+    this.props.passwordHash = null;
+    this.touch();
+  }
+
+  /** Mark the email address verified. Idempotent. */
+  markEmailVerified(): void {
+    this.props.emailVerified = true;
+    this.touch();
+  }
+
+  // ─── Getters (passwordHash intentionally NOT exposed — read via toRecord) ────
+
+  get emailVerified(): boolean {
+    return this.props.emailVerified;
+  }
 
   get id(): string {
     return this._id;
