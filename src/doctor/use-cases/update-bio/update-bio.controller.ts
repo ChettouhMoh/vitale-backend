@@ -10,7 +10,7 @@ import {
 import { UpdateBioDto } from './update-bio.dto';
 import { DoctorBio } from '@/doctor/domain';
 import { IDoctorBioRepository } from '@/doctor/ports';
-import { CurrentDoctor } from '@/common/decorators/current-doctor.decorator';
+import { CurrentUser } from '@/auth/decorators';
 
 export class BioResponse {
   @ApiProperty() doctorId!: string;
@@ -39,7 +39,7 @@ export class UpdateBioController {
   @ApiBody({ type: UpdateBioDto })
   @ApiResponse({ status: 200, type: BioResponse })
   async execute(
-    @CurrentDoctor() doctorId: string,
+    @CurrentUser('id') doctorId: string,
     @Body() dto: UpdateBioDto,
   ): Promise<BioResponse> {
     // Load-or-empty: the section document is created lazily on first write.

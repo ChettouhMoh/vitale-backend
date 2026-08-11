@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
+import { IAuthSubjectStore, IDoctorRegistration } from '@/auth/ports';
+import {
+  DoctorAuthSubjectStore,
+  DoctorRegistrationService,
+} from './auth';
 import {
   CreateDoctorController,
   GetDoctorController,
@@ -33,5 +38,12 @@ import {
     SubmitVerificationController,
     DecideVerificationController,
   ],
+  providers: [
+    // Adapters the auth context depends on (auth → doctor). Bound here so the
+    // doctor module owns its own aggregate-to-auth projection.
+    { provide: IAuthSubjectStore, useClass: DoctorAuthSubjectStore },
+    { provide: IDoctorRegistration, useClass: DoctorRegistrationService },
+  ],
+  exports: [IAuthSubjectStore, IDoctorRegistration],
 })
 export class DoctorModule {}

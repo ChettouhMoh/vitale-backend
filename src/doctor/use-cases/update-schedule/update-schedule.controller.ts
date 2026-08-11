@@ -9,7 +9,7 @@ import {
 import { UpdateScheduleDto } from './update-schedule.dto';
 import { DoctorSchedule } from '@/doctor/domain';
 import { IDoctorScheduleRepository } from '@/doctor/ports';
-import { CurrentDoctor } from '@/common/decorators/current-doctor.decorator';
+import { CurrentUser } from '@/auth/decorators';
 
 class ScheduleDayOut {
   @ApiProperty() dayKey!: string;
@@ -50,7 +50,7 @@ export class UpdateScheduleController {
     description: 'Duplicate day or invalid time range',
   })
   async execute(
-    @CurrentDoctor() doctorId: string,
+    @CurrentUser('id') doctorId: string,
     @Body() dto: UpdateScheduleDto,
   ): Promise<ScheduleResponse> {
     const doc =

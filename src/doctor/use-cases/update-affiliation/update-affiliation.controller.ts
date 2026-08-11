@@ -5,7 +5,7 @@ import { DoctorResponse } from '../get-doctor';
 import { DoctorErrorCode } from '@/doctor/domain';
 import { IDoctorRepository } from '@/doctor/ports';
 import { DomainError } from '@/common/errors/domain.error';
-import { CurrentDoctor } from '@/common/decorators/current-doctor.decorator';
+import { CurrentUser } from '@/auth/decorators';
 
 @ApiTags('Doctors')
 @Controller({ path: 'doctors', version: '1' })
@@ -25,7 +25,7 @@ export class UpdateAffiliationController {
   })
   @ApiResponse({ status: 404, description: 'Doctor not found' })
   async execute(
-    @CurrentDoctor() doctorId: string,
+    @CurrentUser('id') doctorId: string,
     @Body() dto: UpdateAffiliationDto,
   ): Promise<DoctorResponse> {
     const doctor = await this.doctors.findById(doctorId);

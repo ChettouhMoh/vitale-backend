@@ -4,7 +4,7 @@ import { DoctorResponse } from '../get-doctor';
 import { DoctorErrorCode } from '@/doctor/domain';
 import { IDoctorRepository } from '@/doctor/ports';
 import { DomainError } from '@/common/errors/domain.error';
-import { CurrentDoctor } from '@/common/decorators/current-doctor.decorator';
+import { CurrentUser } from '@/auth/decorators';
 
 /**
  * Doctor submits their KYC for review: unverified|rejected → pending.
@@ -27,7 +27,7 @@ export class SubmitVerificationController {
     status: 409,
     description: 'Not in a submittable state (already pending/verified)',
   })
-  async execute(@CurrentDoctor() doctorId: string): Promise<DoctorResponse> {
+  async execute(@CurrentUser('id') doctorId: string): Promise<DoctorResponse> {
     const doctor = await this.doctors.findById(doctorId);
     if (!doctor) {
       throw new DomainError(

@@ -9,7 +9,7 @@ import {
 import { UpdateLanguagesDto } from './update-languages.dto';
 import { DoctorLanguages } from '@/doctor/domain';
 import { IDoctorLanguagesRepository } from '@/doctor/ports';
-import { CurrentDoctor } from '@/common/decorators/current-doctor.decorator';
+import { CurrentUser } from '@/auth/decorators';
 
 export class LanguagesResponse {
   @ApiProperty() doctorId!: string;
@@ -38,7 +38,7 @@ export class UpdateLanguagesController {
   @ApiBody({ type: UpdateLanguagesDto })
   @ApiResponse({ status: 200, type: LanguagesResponse })
   async execute(
-    @CurrentDoctor() doctorId: string,
+    @CurrentUser('id') doctorId: string,
     @Body() dto: UpdateLanguagesDto,
   ): Promise<LanguagesResponse> {
     const doc =

@@ -9,7 +9,7 @@ import {
 import { UpdateExpertiseDto } from './update-expertise.dto';
 import { DoctorExpertise } from '@/doctor/domain';
 import { IDoctorExpertiseRepository } from '@/doctor/ports';
-import { CurrentDoctor } from '@/common/decorators/current-doctor.decorator';
+import { CurrentUser } from '@/auth/decorators';
 
 export class ExpertiseResponse {
   @ApiProperty() doctorId!: string;
@@ -38,7 +38,7 @@ export class UpdateExpertiseController {
   @ApiBody({ type: UpdateExpertiseDto })
   @ApiResponse({ status: 200, type: ExpertiseResponse })
   async execute(
-    @CurrentDoctor() doctorId: string,
+    @CurrentUser('id') doctorId: string,
     @Body() dto: UpdateExpertiseDto,
   ): Promise<ExpertiseResponse> {
     const doc =

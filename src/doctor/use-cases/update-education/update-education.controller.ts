@@ -9,7 +9,7 @@ import {
 import { UpdateEducationDto } from './update-education.dto';
 import { DoctorEducation } from '@/doctor/domain';
 import { IDoctorEducationRepository } from '@/doctor/ports';
-import { CurrentDoctor } from '@/common/decorators/current-doctor.decorator';
+import { CurrentUser } from '@/auth/decorators';
 
 class EducationEntryOut {
   @ApiProperty() degree!: string;
@@ -45,7 +45,7 @@ export class UpdateEducationController {
   @ApiResponse({ status: 200, type: EducationResponse })
   @ApiResponse({ status: 400, description: 'Invalid education year (future)' })
   async execute(
-    @CurrentDoctor() doctorId: string,
+    @CurrentUser('id') doctorId: string,
     @Body() dto: UpdateEducationDto,
   ): Promise<EducationResponse> {
     const doc =
