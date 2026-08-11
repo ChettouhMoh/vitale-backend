@@ -14,6 +14,7 @@ import {
 } from '@/doctor/ports';
 import { IOutboxRepository } from '@/shared/events/ports';
 import { INotificationRepository } from '@/notification/ports';
+import { IDoctorOAuthLinkRepository } from '@/auth/ports';
 import { Global, Module } from '@nestjs/common';
 import { InMemoryPatientRepository } from './patient/in-memory-patient';
 import { InMemoryMedicationRepository } from './medication/in-memory-medication';
@@ -29,6 +30,7 @@ import { InMemoryDoctorEducationRepository } from './doctor/in-memory-doctor-edu
 import { InMemoryDoctorScheduleRepository } from './doctor/in-memory-doctor-schedule.repository';
 import { InMemoryOutboxRepository } from './events/in-memory-outbox.repository';
 import { InMemoryNotificationRepository } from './notification/in-memory-notification.repository';
+import { InMemoryDoctorOAuthLinkRepository } from './auth/in-memory-doctor-oauth-link.repository';
 
 // make it globale module so we can access the repositories in any module without importing it explicitly
 @Global()
@@ -68,6 +70,10 @@ import { InMemoryNotificationRepository } from './notification/in-memory-notific
       provide: INotificationRepository,
       useClass: InMemoryNotificationRepository,
     },
+    {
+      provide: IDoctorOAuthLinkRepository,
+      useClass: InMemoryDoctorOAuthLinkRepository,
+    },
   ],
   exports: [
     // Export the repositories so they can be used in other modules
@@ -85,6 +91,7 @@ import { InMemoryNotificationRepository } from './notification/in-memory-notific
     IDoctorScheduleRepository,
     IOutboxRepository,
     INotificationRepository,
+    IDoctorOAuthLinkRepository,
   ],
 })
 export class PersistenceModule {}

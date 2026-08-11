@@ -36,4 +36,12 @@ export class InMemoryDoctorRepository implements IDoctorRepository {
   async findById(id: string): Promise<Doctor | null> {
     return this.store.get(id) ?? null;
   }
+
+  async findByEmail(email: string): Promise<Doctor | null> {
+    const normalised = email.trim().toLowerCase();
+    for (const doctor of this.store.values()) {
+      if (doctor.email === normalised) return doctor;
+    }
+    return null;
+  }
 }
