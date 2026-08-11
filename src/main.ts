@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import basicAuth from 'express-basic-auth';
+import cookieParser from 'cookie-parser';
 import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from '@/app.module';
 import { swaggerConfig } from '@/config/swagger.config';
@@ -28,6 +29,9 @@ async function bootstrap() {
     res.setHeader('x-request-id', requestId);
     next();
   });
+
+  // ── Cookie parsing (auth reads httpOnly JWT cookies off req.cookies) ──
+  app.use(cookieParser());
 
   // ── Security headers ─────────────────────────────────────────────────
   // app.use(helmet());

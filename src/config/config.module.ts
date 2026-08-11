@@ -57,6 +57,44 @@ import * as Joi from 'joi';
         // When false, the channel adapter logs instead of sending (the
         // Notification record is still created).
         NOTIFICATIONS_ENABLED: Joi.boolean().default(true),
+
+        // ── Auth: one JWT secret per purpose (all ≥ 32 chars) ──────────────
+        // A token minted for one purpose fails signature verification for any
+        // other because the secrets differ; `typ` is a second barrier.
+        JWT_DOCTOR_ACCESS_SECRET: Joi.string().min(32).required(),
+        JWT_DOCTOR_REFRESH_SECRET: Joi.string().min(32).required(),
+        JWT_ADMIN_ACCESS_SECRET: Joi.string().min(32).required(),
+        JWT_ADMIN_REFRESH_SECRET: Joi.string().min(32).required(),
+        JWT_EMAIL_VERIFY_SECRET: Joi.string().min(32).required(),
+        JWT_PASSWORD_RESET_SECRET: Joi.string().min(32).required(),
+        JWT_OAUTH_TICKET_SECRET: Joi.string().min(32).required(),
+        // Token lifetimes (jsonwebtoken duration strings).
+        JWT_DOCTOR_ACCESS_TTL: Joi.string().default('1h'),
+        JWT_DOCTOR_REFRESH_TTL: Joi.string().default('24h'),
+        // Base URL of the dashboard — builds email verification / reset links.
+        APP_URL: Joi.string().uri().required(),
+        // Optional cookie domain (e.g. `.vitale.dz` to share across subdomains).
+        COOKIE_DOMAIN: Joi.string().optional(),
+
+        // ── OAuth (Google) — required only when enabled ────────────────────
+        OAUTH_GOOGLE_ENABLED: Joi.boolean().default(false),
+        GOOGLE_CLIENT_ID: Joi.string().when('OAUTH_GOOGLE_ENABLED', {
+          is: true,
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        GOOGLE_CLIENT_SECRET: Joi.string().when('OAUTH_GOOGLE_ENABLED', {
+          is: true,
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        GOOGLE_REDIRECT_URI: Joi.string()
+          .uri()
+          .when('OAUTH_GOOGLE_ENABLED', {
+            is: true,
+            then: Joi.required(),
+            otherwise: Joi.optional(),
+          }),
       }),
       validationOptions: {
         // Surface every problem at once rather than failing on the first.

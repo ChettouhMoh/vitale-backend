@@ -10,6 +10,7 @@ import { VaccineModule } from './patient-record/vaccine/vaccine.module';
 import { DoctorNoteModule } from './patient-record/doctor-note/doctor-note.module';
 import { AttachmentModule } from './attachment/attachment.module';
 import { DoctorModule } from './doctor/doctor.module';
+import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './shared/events/events.module';
 import { NotificationModule } from './notification/notification.module';
 import { PersistenceModule } from './persistence/persistence.module';
@@ -33,6 +34,8 @@ import { PersistenceModule } from './persistence/persistence.module';
     DoctorNoteModule,
     AttachmentModule,
     DoctorModule,
+    // Auth context — registers the global default-deny access guards.
+    AuthModule,
     // Subscribes to domain events; imported so its handler providers exist.
     NotificationModule,
   ],
