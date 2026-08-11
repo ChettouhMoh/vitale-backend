@@ -9,6 +9,8 @@ import { Doctor } from '../domain';
 export interface IDoctorRepository {
   save(doctor: Doctor): Promise<void>;
   findById(id: string): Promise<Doctor | null>;
+  /** Lookup by (normalised, lowercased) email — used by the auth-subject adapter. */
+  findByEmail(email: string): Promise<Doctor | null>;
 }
 
 export const IDoctorRepository = Symbol('IDoctorRepository');
