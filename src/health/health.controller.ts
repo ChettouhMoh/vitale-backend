@@ -13,6 +13,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { Client as PgClient } from 'pg';
 import Redis from 'ioredis';
+import { Public } from '@/auth/decorators';
 
 /**
  * Aggregated health response.
@@ -49,6 +50,7 @@ export class HealthController {
    * probe.
    */
   @Get()
+  @Public() // liveness probe must not require authentication
   @HealthCheck()
   async check(): Promise<HealthResponse> {
     // const [database, redis] = await Promise.all([
