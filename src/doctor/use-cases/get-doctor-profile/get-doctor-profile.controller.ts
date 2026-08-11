@@ -15,7 +15,7 @@ import {
   IDoctorEducationRepository,
   IDoctorScheduleRepository,
 } from '@/doctor/ports';
-import { CurrentDoctor } from '@/common/decorators/current-doctor.decorator';
+import { CurrentUser } from '@/auth/decorators';
 
 @ApiTags('Doctors')
 @Controller({ path: 'doctors', version: '1' })
@@ -39,7 +39,7 @@ export class GetDoctorProfileController {
   })
   @ApiResponse({ status: 200, type: DoctorProfileResponse })
   async execute(
-    @CurrentDoctor() doctorId: string,
+    @CurrentUser('id') doctorId: string,
   ): Promise<DoctorProfileResponse> {
     // Each section is its own document; a missing one defaults to empty so the
     // lazy-load endpoint never 404s.
