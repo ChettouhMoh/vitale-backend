@@ -2,12 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v7 as uuidv7 } from 'uuid';
 import * as jwt from 'jsonwebtoken';
-import { AuthErrorCode, TokenPurpose } from '@/auth/domain';
-import {
-  ITokenIssuer,
-  TokenClaims,
-  VerifiedClaims,
-} from '@/auth/ports';
+import { TokenPurpose } from '@/auth/domain';
+import { AuthErrorCode } from '@/common/errors/codes/auth.errors';
+import { ITokenIssuer, TokenClaims, VerifiedClaims } from '@/auth/ports';
 import { DomainError } from '@/common/errors/domain.error';
 
 /** Everything that differs per purpose: its own secret, TTL, `typ`, audience. */
@@ -38,7 +35,10 @@ export class JwtTokenIssuer implements ITokenIssuer {
 
   constructor(config: ConfigService) {
     const doctorAccessTtl = config.get<string>('JWT_DOCTOR_ACCESS_TTL', '1h');
-    const doctorRefreshTtl = config.get<string>('JWT_DOCTOR_REFRESH_TTL', '24h');
+    const doctorRefreshTtl = config.get<string>(
+      'JWT_DOCTOR_REFRESH_TTL',
+      '24h',
+    );
 
     // Access/refresh failures are indistinguishable to the client — both mean
     // "log in again" — so they share UNAUTHENTICATED. Link/ticket tokens get

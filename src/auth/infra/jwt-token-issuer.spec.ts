@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { JwtTokenIssuer } from './jwt-token-issuer';
-import { AuthErrorCode, TokenPurpose } from '@/auth/domain';
+import { TokenPurpose } from '@/auth/domain';
 import { DomainError } from '@/common/errors/domain.error';
+import { AuthErrorCode } from '@/common/errors/codes/auth.errors';
 
 const SECRETS: Record<string, string> = {
   JWT_DOCTOR_ACCESS_SECRET: 'access-secret'.padEnd(40, 'x'),

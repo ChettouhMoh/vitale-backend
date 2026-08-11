@@ -18,8 +18,8 @@ export class Argon2PasswordHasher implements IPasswordHasher {
     try {
       return await argon2.verify(hash, plain);
     } catch {
-      // A malformed/absent hash must read as "no match", never blow up the
-      // login path — the caller has already decided this branch is a failure.
+      // A malformed/absent hash must read as "no match",
+      // never blow up the login path — the caller has already decided this branch is a failure.
       return false;
     }
   }
