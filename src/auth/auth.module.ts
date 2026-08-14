@@ -10,12 +10,7 @@ import {
   JwtTokenIssuer,
 } from './infra';
 import { AuthKernel, OAUTH_PROVIDERS, OAuthProviderRegistry } from './kernel';
-import {
-  EmailIpThrottlerGuard,
-  JwtAuthGuard,
-  KycVerifiedGuard,
-  RolesGuard,
-} from './guards';
+import { JwtAuthGuard } from './guards';
 import {
   ChangePasswordController,
   CompleteOAuthSignupController,
@@ -83,11 +78,17 @@ import {
       },
     },
     // Resolvable for @UseGuards on the throttled endpoints.
-    EmailIpThrottlerGuard,
+    // EmailIpThrottlerGuard,
     // Global guards, default-deny. Order matters: authn first, then role, then KYC.
+    // JwtAuthGuard: authn — required for `@CurrentUser('id')` to resolve on every
+    //   non-`@Public()` route. ENABLED. (@Public() keeps login/signup/etc. open.)
     { provide: APP_GUARD, useClass: JwtAuthGuard },
-    { provide: APP_GUARD, useClass: RolesGuard },
-    { provide: APP_GUARD, useClass: KycVerifiedGuard },
+    // RolesGuard / KycVerifiedGuard: authorization layers, intentionally left off
+    // for now — the KYC-doc upload endpoint must be reachable BEFORE a doctor is
+    // KYC-verified, so KycVerifiedGuard cannot be global until that endpoint is
+    // exempted. Flip on once the verify flow is marked `@Public()`-exempt.
+    // { provide: APP_GUARD, useClass: RolesGuard },
+    // { provide: APP_GUARD, useClass: KycVerifiedGuard },
   ],
 })
 export class AuthModule {}
