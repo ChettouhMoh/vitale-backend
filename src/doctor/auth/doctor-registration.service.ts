@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Doctor } from '@/doctor/domain';
+import { Doctor, DoctorErrorCode } from '@/doctor/domain';
 import { IDoctorRepository } from '@/doctor/ports';
 import { IDoctorRegistration } from '@/auth/ports';
+import { DomainError } from '@/common/errors/domain.error';
 
 /**
  * DoctorRegistrationService — the doctor module's implementation of the
@@ -37,5 +38,18 @@ export class DoctorRegistrationService implements IDoctorRegistration {
     });
     await this.doctors.save(doctor);
     return { doctorId: doctor.id };
+  }
+
+  async attachAvatar(doctorId: string, attachmentId: string): Promise<void> {
+    const doctor = await this.doctors.findById(doctorId);
+    if (!doctor) {
+      throw new DomainError(
+        DoctorErrorCode.DOCTOR_NOT_FOUND,
+        `Doctor ${doctorId} not found`,
+        404,
+      );
+    }
+    doctor.setAvatar(attachmentId);
+    await this.doctors.save(doctor);
   }
 }
