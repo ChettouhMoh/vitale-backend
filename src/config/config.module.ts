@@ -76,6 +76,38 @@ import * as Joi from 'joi';
         // Optional cookie domain (e.g. `.vitale.dz` to share across subdomains).
         COOKIE_DOMAIN: Joi.string().optional(),
 
+        // ── Storage adapter selection ─────────────────────────────────────
+        // `r2` wires Cloudflare R2 (S3-compatible); any other value (default)
+        // keeps the in-memory fake so the full attachment flow is curl-testable
+        // locally with no cloud credentials.
+        STORAGE_PROVIDER: Joi.string()
+          .valid('in-memory', 'r2')
+          .default('in-memory'),
+        // Required when STORAGE_PROVIDER=r2.
+        R2_ACCOUNT_ID: Joi.string().when('STORAGE_PROVIDER', {
+          is: 'r2',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        R2_ACCESS_KEY_ID: Joi.string().when('STORAGE_PROVIDER', {
+          is: 'r2',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        R2_SECRET_ACCESS_KEY: Joi.string().when('STORAGE_PROVIDER', {
+          is: 'r2',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        R2_BUCKET: Joi.string().when('STORAGE_PROVIDER', {
+          is: 'r2',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        // Optional CDN / public base URL for R2 objects. If unset, the adapter
+        // builds the S3 API path (works for public-access buckets).
+        R2_PUBLIC_URL: Joi.string().uri().optional(),
+
         // ── OAuth (Google) — required only when enabled ────────────────────
         OAUTH_GOOGLE_ENABLED: Joi.boolean().default(false),
         GOOGLE_CLIENT_ID: Joi.string().when('OAUTH_GOOGLE_ENABLED', {
@@ -88,13 +120,11 @@ import * as Joi from 'joi';
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),
-        GOOGLE_REDIRECT_URI: Joi.string()
-          .uri()
-          .when('OAUTH_GOOGLE_ENABLED', {
-            is: true,
-            then: Joi.required(),
-            otherwise: Joi.optional(),
-          }),
+        GOOGLE_REDIRECT_URI: Joi.string().uri().when('OAUTH_GOOGLE_ENABLED', {
+          is: true,
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
       }),
       validationOptions: {
         // Surface every problem at once rather than failing on the first.
