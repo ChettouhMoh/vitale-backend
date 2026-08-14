@@ -11,10 +11,15 @@ import {
   RequestPresignedUploadDto,
   RequestPresignedUploadResponse,
 } from './request-presigned-upload.dto';
-import { Attachment, AttachmentType, UploadStrategy } from '@/attachment/domain';
+import {
+  Attachment,
+  AttachmentType,
+  UploadStrategy,
+} from '@/attachment/domain';
 import { IAttachmentRepository } from '@/attachment/ports/attachment.repository.interface';
 import { IStorageProvider } from '@/attachment/ports/storage-provider.interface';
 import { LoggerService } from '@/common/logger/logger.service';
+import { CurrentUser } from '@/auth/decorators';
 
 const PRESIGN_TTL_SECONDS = 300; // 5 minutes
 
@@ -32,7 +37,8 @@ export class RequestPresignedUploadController {
   @Post('presigned')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Request a presigned URL for a direct-to-storage upload (large docs)',
+    summary:
+      'Request a presigned URL for a direct-to-storage upload (large docs)',
   })
   @ApiBody({ type: RequestPresignedUploadDto })
   @ApiResponse({ status: 201, type: RequestPresignedUploadResponse })
@@ -41,6 +47,7 @@ export class RequestPresignedUploadController {
     description: 'Strategy / MIME / size violation (e.g. presigning an avatar)',
   })
   async execute(
+    @CurrentUser('id') ownerId: string,
     @Body() dto: RequestPresignedUploadDto,
   ): Promise<RequestPresignedUploadResponse> {
     const type = AttachmentType.create(dto.type);
@@ -58,7 +65,7 @@ export class RequestPresignedUploadController {
     // PENDING row — nothing is trusted until confirm verifies the bytes.
     const attachment = Attachment.createPendingForPresign({
       type,
-      ownerId: dto.ownerId,
+      ownerId,
       declaredMime: dto.mimeType,
       declaredSize: dto.sizeBytes,
       expiresAt,

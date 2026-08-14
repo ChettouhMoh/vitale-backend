@@ -2,18 +2,18 @@ import {
   Controller,
   Post,
   Param,
-  Body,
   Inject,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiResponse } from '@nestjs/swagger';
-import { ConfirmUploadDto, ConfirmUploadResponse } from './confirm-upload.dto';
+import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ConfirmUploadResponse } from './confirm-upload.dto';
 import { AttachmentErrorCode } from '@/common/errors/codes';
 import { DomainError } from '@/common/errors/domain.error';
 import { IAttachmentRepository } from '@/attachment/ports/attachment.repository.interface';
 import { IStorageProvider } from '@/attachment/ports/storage-provider.interface';
 import { LoggerService } from '@/common/logger/logger.service';
+import { CurrentUser } from '@/auth/decorators';
 
 @ApiTags('Attachments')
 @Controller({ path: 'attachments', version: '1' })
@@ -29,10 +29,10 @@ export class ConfirmUploadController {
   @Post(':id/confirm')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Confirm a presigned upload — verifies the object before activating',
+    summary:
+      'Confirm a presigned upload — verifies the object before activating',
   })
   @ApiParam({ name: 'id', description: 'Attachment id' })
-  @ApiBody({ type: ConfirmUploadDto })
   @ApiResponse({ status: 200, type: ConfirmUploadResponse })
   @ApiResponse({ status: 403, description: 'Not the owner' })
   @ApiResponse({ status: 404, description: 'Attachment not found' })
@@ -41,8 +41,8 @@ export class ConfirmUploadController {
     description: 'Object not in storage, or not in a confirmable state',
   })
   async execute(
+    @CurrentUser('id') ownerId: string,
     @Param('id') id: string,
-    @Body() dto: ConfirmUploadDto,
   ): Promise<ConfirmUploadResponse> {
     const attachment = await this.repo.findById(id);
     if (!attachment) {
@@ -53,7 +53,7 @@ export class ConfirmUploadController {
       );
     }
 
-    attachment.assertOwnedBy(dto.ownerId);
+    attachment.assertOwnedBy(ownerId);
 
     // NEVER trust the client's "I uploaded it" — check the store itself.
     const info = await this.storage.verifyExists(attachment.storageKey);

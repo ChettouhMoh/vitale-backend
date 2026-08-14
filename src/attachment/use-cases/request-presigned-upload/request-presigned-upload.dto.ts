@@ -4,18 +4,19 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AttachmentTypeValue } from '@/attachment/domain';
 
 export class RequestPresignedUploadDto {
-  @ApiProperty({ enum: AttachmentTypeValue, example: AttachmentTypeValue.MedicalDegree })
+  @ApiProperty({
+    enum: AttachmentTypeValue,
+    example: AttachmentTypeValue.MedicalDegree,
+  })
   @IsEnum(AttachmentTypeValue, {
     message: `type must be one of: ${Object.values(AttachmentTypeValue).join(', ')}`,
   })
   type!: AttachmentTypeValue;
 
-  @ApiProperty({ example: 'doctor-123' })
-  @IsString()
-  @IsNotEmpty()
-  ownerId!: string;
-
-  @ApiProperty({ example: 'application/pdf', description: 'Declared MIME of the file to upload' })
+  @ApiProperty({
+    example: 'application/pdf',
+    description: 'Declared MIME of the file to upload',
+  })
   @IsString()
   @IsNotEmpty()
   mimeType!: string;
