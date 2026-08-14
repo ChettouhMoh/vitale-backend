@@ -4,6 +4,8 @@ import { IVaccineRepository } from '@/patient-record/vaccine/ports/vaccine.repos
 import { IDoctorNoteRepository } from '@/patient-record/doctor-note/ports/doctor-note.repository.interface';
 import { IAttachmentRepository } from '@/attachment/ports/attachment.repository.interface';
 import { IStorageProvider } from '@/attachment/ports/storage-provider.interface';
+import { ConfigService } from '@nestjs/config';
+import { Global, Module } from '@nestjs/common';
 import {
   IDoctorRepository,
   IDoctorBioRepository,
@@ -15,13 +17,13 @@ import {
 import { IOutboxRepository } from '@/shared/events/ports';
 import { INotificationRepository } from '@/notification/ports';
 import { IDoctorOAuthLinkRepository } from '@/auth/ports';
-import { Global, Module } from '@nestjs/common';
 import { InMemoryPatientRepository } from './patient/in-memory-patient';
 import { InMemoryMedicationRepository } from './medication/in-memory-medication';
 import { InMemoryVaccineRepository } from './vaccine/in-memory-vaccine';
 import { InMemoryDoctorNoteRepository } from './doctor-note/in-memory-doctor-note';
 import { InMemoryAttachmentRepository } from './attachment/in-memory-attachment';
 import { InMemoryStorageProvider } from './attachment/in-memory-storage.provider';
+import { R2StorageProvider } from './attachment/r2-storage.provider';
 import { InMemoryDoctorRepository } from './doctor/in-memory-doctor.repository';
 import { InMemoryDoctorBioRepository } from './doctor/in-memory-doctor-bio.repository';
 import { InMemoryDoctorExpertiseRepository } from './doctor/in-memory-doctor-expertise.repository';
@@ -43,8 +45,17 @@ import { InMemoryDoctorOAuthLinkRepository } from './auth/in-memory-doctor-oauth
     { provide: IVaccineRepository, useClass: InMemoryVaccineRepository },
     { provide: IDoctorNoteRepository, useClass: InMemoryDoctorNoteRepository },
     { provide: IAttachmentRepository, useClass: InMemoryAttachmentRepository },
-    // Storage adapter (fake, in-memory). Swap for an S3/Cloudinary adapter later.
-    { provide: IStorageProvider, useClass: InMemoryStorageProvider },
+    // Storage adapter — in-memory (dev/local curl) or Cloudflare R2 (prod).
+    // Pick with STORAGE_PROVIDER=r2 in production; defaults to in-memory so the
+    // presigned → confirm flow stays exercisable locally with zero cloud creds.
+    {
+      provide: IStorageProvider,
+      useFactory: (config: ConfigService) =>
+        config.get<string>('STORAGE_PROVIDER') === 'r2'
+          ? new R2StorageProvider(config)
+          : new InMemoryStorageProvider(),
+      inject: [ConfigService],
+    },
     { provide: IDoctorRepository, useClass: InMemoryDoctorRepository },
     // Extended profile — one document store per section (keyed by doctorId).
     { provide: IDoctorBioRepository, useClass: InMemoryDoctorBioRepository },
