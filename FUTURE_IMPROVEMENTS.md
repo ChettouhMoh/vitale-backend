@@ -1,63 +1,34 @@
-# Vitale Backend — Future Improvements
+# Future Improvements
 
-Running backlog of backend-only improvements deferred for later. Add new items as
-bullet points; keep this file backend-specific (no dashboard/frontend notes).
+## Storage integrity — large presigned uploads
 
-## Authorization (once auth lands)
+### Context
+`R2StorageProvider.verifyExists` (used by the presigned → confirm flow in
+`confirm-upload.controller.ts`) returns the object's R2 `ETag` as the
+`sha256Digest` that `Attachment.confirm` persists.
 
-- **Enforce author-only edits on notes at the API, not just the UI.** `PATCH`/`DELETE /v1/notes/:id`
-  currently let any caller modify any note. Compare the authenticated doctor id to `note.doctorId`
-  and return **403** otherwise.
-- **Guard who can add records to a patient.** Add-note / add-medication / add-vaccine accept any caller;
-  gate them behind authentication (and, where relevant, role checks) when auth is wired.
+### Current behavior
+This is correct **today** because the per-type `AttachmentType` constraints cap
+single-part uploads at 20 MB (`request-presigned-upload.controller.ts` passes
+`maxBytes`, and `Attachment.confirm` re-runs `assertSizeWithinLimit`). R2 objects
+uploaded as a single `PUT` (≤ 5 GB) produce an MD5-based ETag, so the digest is
+trustworthy.
 
-## Data integrity
+### When it breaks
+R2 ETags are **not** MD5 (and not sha256) for multipart-uploaded objects. If KYC
+document limits are raised above what's practical to single-part PUT, or if a
+client switches to a multipart-capable presigned upload for very large files,
+`verifyExists` would record a composite/incorrect digest.
 
-- **Validate `patientId` on write.** Add/list across all four modules trust the `patientId` param with no
-  existence check — a note/medication/vaccine can be created for a non-existent patient (orphan). Add an
-  existence guard (or a real FK) once patients + records share infrastructure.
-- **NIN uniqueness (409).** `create-patient` documents a 409 for `NIN_ALREADY_REGISTERED`, but the
-  in-memory repo never enforces it. Add a unique constraint (and map the DB error to the domain error)
-  when the real DB lands.
+### Fix to apply if uploads ever go multipart
+1. Have the client compute and set the object's sha256 as a custom PUT header,
+   e.g. `x-amz-meta-sha256`, when requesting the presigned URL (extend
+   `createPresignedUpload` to also return a fixed header key the client must send).
+2. Change `verifyExists` to read that custom header from `HeadObject` and return
+   it as `sha256Digest` instead of the ETag.
+3. Fall back to the ETag→MD5 path only for single-part uploads (or drop it
+   entirely once #1 is in place for every path).
 
-## Denormalization maintenance (doctor-note)
-
-- **Reconcile the denormalized doctor snapshot on profile change.** Notes store `doctorName` /
-  `specialty` / `doctorAvatar` at write time. When a doctor updates their profile, propagate the change
-  to their notes (e.g. Mongo `updateMany({ doctorId }, { $set: … })`) via a background/event handler —
-  eventual consistency, keeps reads join-free.
-
-## Query / performance
-
-- **Push list sorting into the repository/query.** `get-patient-notes` sorts newest-first in the
-  controller; with a real store use `sort({ createdAt: -1 })` + a `createdAt` index instead of in-memory
-  sorting.
-- **Paginate unbounded lists.** A patient's notes / medications / vaccines grow without limit — add
-  pagination (limit/offset or cursor) to the list endpoints before they get large.
-
-## Infrastructure
-
-- **Swap in-memory repositories for real adapters behind the existing ports.** Primary DB (e.g. Postgres)
-  for patient/medication/vaccine; separate Mongo store for doctor-notes (fast read/write, denormalized).
-  The ports (`I*Repository`) already isolate this — only `src/persistence/**` should change.
-
-## Localization
-
-- **Resolve the request locale from a header instead of hardcoding it.** `create-doctor.controller`
-  currently passes a fixed `locale` into the `doctor.registered` event, so every verification email
-  is one language. Since notifications are sent **async** (outbox dispatcher — no request in scope at
-  send time), the locale must be captured at request time and carried in the event payload; it can't be
-  detected later. Add a small `resolveLocale(req)` helper with the precedence **`X-Locale` header →
-  `Accept-Language` → default `'fr'`**, validated against the supported set (`en` / `fr` / `ar`). The
-  dashboard sends `X-Locale` explicitly (see its backlog) because that reflects the language the user
-  *picked* in the app, which `Accept-Language` (browser/OS install language) does not. Use the resolved
-  value in the emit **and** persist it on the aggregate.
-- **Store `locale` on the `Doctor` aggregate.** Add a `locale` field (default `'fr'`) set at signup from
-  the resolved request locale. Authenticated/async notifications (`doctor.kyc_approved`, etc.) then read
-  `doctor.locale` from the aggregate — no header needed once the user exists; the aggregate is the source
-  of truth for every future notification.
-
-## Default Seeding
-
-- **Default vaccines sseding.** when patient created for the first time in system that must fire an event
-  to seed default vaccines based on ALgerian health care system ( in-search )
+### Status
+Not needed for the current 20 MB ceiling; keep this note before raising KYC
+upload limits or adopting S3 multipart uploads.
