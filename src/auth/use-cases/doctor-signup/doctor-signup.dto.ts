@@ -12,18 +12,18 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /** Structural validation only — domain rules live elsewhere. */
 export class DoctorSignupDto {
-  @ApiProperty({ example: 'sarah.ahmed@vitale.dz' })
+  @ApiProperty({ example: 'abdouchettouh80@gmail.com' })
   @IsEmail()
   @MaxLength(255)
   email!: string;
 
-  @ApiProperty({ example: 'S3curePass!2345', minLength: 12 })
+  @ApiProperty({ example: '123456789123', minLength: 12 })
   @IsString()
   @MinLength(12) // security requirement #9
   @MaxLength(128)
   password!: string;
 
-  @ApiProperty({ example: 'Dr. Sarah Ahmed' })
+  @ApiProperty({ example: 'Mohamed Chettouh' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(150)
@@ -54,7 +54,23 @@ export class DoctorSignupDto {
   locale?: string;
 }
 
+export class SignupAvatarResult {
+  @ApiProperty({ example: '019fbaaa-1111-7000-8000-000000000000' })
+  id!: string;
+
+  @ApiProperty({
+    example: 'https://cdn.vitale.dz/avatar/doctor-123/019fbaaa-….webp',
+  })
+  url!: string;
+}
+
 export class DoctorSignupResponse {
   @ApiProperty({ example: '019fbaaa-1111-7000-8000-000000000000' })
   id!: string;
+
+  @ApiPropertyOptional({
+    description: 'Present only when an avatar was uploaded during signup',
+    type: SignupAvatarResult,
+  })
+  avatar?: SignupAvatarResult;
 }

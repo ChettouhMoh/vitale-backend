@@ -20,6 +20,13 @@ export interface IDoctorRegistration {
     medicalLicenseNumber: string;
     phone?: string | null;
   }): Promise<{ doctorId: string }>;
+  /**
+   * Link an attachment (e.g. the signup avatar produced by UploadAttachmentService)
+   * to the doctor's identity. Called during signup — before the doctor is
+   * verified or logged in — so the owner-id is supplied server-side rather than
+   * read from a JWT.
+   */
+  attachAvatar(doctorId: string, attachmentId: string): Promise<void>;
 }
 
 export const IDoctorRegistration = Symbol('IDoctorRegistration');
