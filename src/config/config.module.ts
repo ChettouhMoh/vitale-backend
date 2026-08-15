@@ -99,7 +99,7 @@ import * as Joi from 'joi';
           then: Joi.required(),
           otherwise: Joi.optional(),
         }),
-        R2_BUCKET: Joi.string().when('STORAGE_PROVIDER', {
+        R2_PUBLIC_BUCKET: Joi.string().when('STORAGE_PROVIDER', {
           is: 'r2',
           then: Joi.required(),
           otherwise: Joi.optional(),
@@ -107,6 +107,17 @@ import * as Joi from 'joi';
         // Optional CDN / public base URL for R2 objects. If unset, the adapter
         // builds the S3 API path (works for public-access buckets).
         R2_PUBLIC_URL: Joi.string().uri().optional(),
+
+        // ── Private bucket (KYC / identity docs) ─────────────────────────
+        // Required when STORAGE_PROVIDER=r2. These docs are never served
+        // directly; access is via short-lived presigned GET URLs checked
+        // against the attachment owner or an admin role.
+        R2_PRIVATE_BUCKET: Joi.string().when('STORAGE_PROVIDER', {
+          is: 'r2',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        R2_PRIVATE_URL: Joi.string().uri().optional(),
 
         // ── OAuth (Google) — required only when enabled ────────────────────
         OAUTH_GOOGLE_ENABLED: Joi.boolean().default(false),
