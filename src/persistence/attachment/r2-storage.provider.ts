@@ -5,41 +5,54 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import {
   IStorageProvider,
   PresignedUpload,
   StoredObjectInfo,
+  PresignedGetUrl,
 } from '@/attachment/ports/storage-provider.interface';
 
 /**
  * Cloudflare R2 adapter — S3-compatible, so the AWS SDK talks to it directly.
- * R2 has no region (use "auto"), bills nothing for egress, and returns an ETag
- * that is the MD5 of the object for single-part uploads (<= 5GB), so
- * `verifyExists` can trust it as the sha256-equivalent digest the confirm step
- * compares against.
+ *
+ * Buckets:
+ * - Public bucket: avatars, logos — objects are served through the public CDN.
+ * - Private bucket: KYC / identity docs — no public reads; access is via
+ *   short-lived presigned GET URLs issued only after an authz check.
  */
 @Injectable()
 export class R2StorageProvider implements IStorageProvider {
   private readonly client: S3Client;
-  private readonly bucket: string;
+  private readonly publicBucket: string;
+  private readonly privateBucket: string;
   private readonly publicUrlBase: string;
+  private readonly privateUrlBase: string;
 
   constructor(config: ConfigService) {
     const accountId = config.get<string>('R2_ACCOUNT_ID');
     const accessKeyId = config.get<string>('R2_ACCESS_KEY_ID');
     const secretAccessKey = config.get<string>('R2_SECRET_ACCESS_KEY');
-    const bucket = config.get<string>('R2_BUCKET');
+    const publicBucket = config.get<string>('R2_PUBLIC_BUCKET');
+    const privateBucket = config.get<string>('R2_PRIVATE_BUCKET');
 
-    if (!accountId || !accessKeyId || !secretAccessKey || !bucket) {
+    if (
+      !accountId ||
+      !accessKeyId ||
+      !secretAccessKey ||
+      !publicBucket ||
+      !privateBucket
+    ) {
       throw new Error(
         'R2 storage is enabled but R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / ' +
-          'R2_SECRET_ACCESS_KEY / R2_BUCKET are not all set.',
+          'R2_SECRET_ACCESS_KEY / R2_PUBLIC_BUCKET / R2_PRIVATE_BUCKET are not all set.',
       );
     }
 
-    this.bucket = bucket;
+    this.publicBucket = publicBucket;
+    this.privateBucket = privateBucket;
 
     this.client = new S3Client({
       region: 'auto',
@@ -47,37 +60,50 @@ export class R2StorageProvider implements IStorageProvider {
       credentials: { accessKeyId, secretAccessKey },
     });
 
-    // Prefer an explicit public/CDN base if provided; otherwise R2's S3 API path
-    // works for objects served through a public-access bucket + custom domain.
-    const cdn = config.get<string>('R2_PUBLIC_URL');
-    this.publicUrlBase = cdn
-      ? cdn.replace(/\/+$/, '')
-      : `https://${accountId}.r2.cloudflarestorage.com/${this.bucket}`;
+    const cdnPublic = config.get<string>('R2_PUBLIC_URL');
+    this.publicUrlBase = cdnPublic
+      ? cdnPublic.replace(/\/+$/, '')
+      : `https://${accountId}.r2.cloudflarestorage.com/${publicBucket}`;
+
+    const cdnPrivate = config.get<string>('R2_PRIVATE_URL');
+    this.privateUrlBase = cdnPrivate
+      ? cdnPrivate.replace(/\/+$/, '')
+      : `https://${accountId}.r2.cloudflarestorage.com/${privateBucket}`;
   }
 
-  private url(key: string): string {
-    return `${this.publicUrlBase}/${key}`;
+  /** Resolve the effective bucket name for a logical bucket identifier. */
+  resolveBucket(bucket: string): string {
+    return bucket === 'private' ? this.privateBucket : this.publicBucket;
+  }
+
+  private url(key: string, bucket: string): string {
+    const base =
+      bucket === 'private' ? this.privateUrlBase : this.publicUrlBase;
+    return `${base}/${key}`;
   }
 
   async upload(input: {
     key: string;
     buffer: Buffer;
     mimeType: string;
+    bucket?: string;
   }): Promise<{ url: string }> {
+    const bucket = this.resolveBucket(input.bucket ?? 'public');
     await this.client.send(
       new PutObjectCommand({
-        Bucket: this.bucket,
+        Bucket: bucket,
         Key: input.key,
         Body: input.buffer,
         ContentType: input.mimeType,
       }),
     );
-    return { url: this.url(input.key) };
+    return { url: this.url(input.key, input.bucket ?? 'public') };
   }
 
-  async delete(key: string): Promise<void> {
+  async delete(input: { key: string; bucket?: string }): Promise<void> {
+    const bucket = this.resolveBucket(input.bucket ?? 'public');
     await this.client.send(
-      new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
+      new DeleteObjectCommand({ Bucket: bucket, Key: input.key }),
     );
   }
 
@@ -86,14 +112,13 @@ export class R2StorageProvider implements IStorageProvider {
     mimeType: string;
     maxBytes: number;
     expiresInSeconds: number;
+    bucket?: string;
   }): Promise<PresignedUpload> {
+    const bucket = this.resolveBucket(input.bucket ?? 'public');
     const command = new PutObjectCommand({
-      Bucket: this.bucket,
+      Bucket: bucket,
       Key: input.key,
       ContentType: input.mimeType,
-      // Bucket policy / R2 object-size limit enforces `maxBytes`; the SDK can't
-      // embed it in the URL, so it's validated by the confirm handler via
-      // `verifyExists` against the AttachmentType constraint.
     });
     const uploadUrl = await getSignedUrl(this.client, command, {
       expiresIn: input.expiresInSeconds,
@@ -106,21 +131,45 @@ export class R2StorageProvider implements IStorageProvider {
     };
   }
 
-  async verifyExists(key: string): Promise<StoredObjectInfo | null> {
+  async verifyExists(input: {
+    key: string;
+    bucket?: string;
+  }): Promise<StoredObjectInfo | null> {
+    const bucket = this.resolveBucket(input.bucket ?? 'public');
     try {
       const { ContentLength, ETag } = await this.client.send(
-        new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
+        new HeadObjectCommand({ Bucket: bucket, Key: input.key }),
       );
       if (!ContentLength) return null;
       return {
         sizeBytes: Number(ContentLength),
         sha256Digest: (ETag || '').replace(/"/g, ''),
         mimeType: '',
-        url: this.url(key),
+        url: this.url(input.key, input.bucket ?? 'public'),
       };
     } catch {
-      // NoSuchKey / 404 → object was never uploaded.
       return null;
     }
+  }
+
+  async createPresignedGetUrl(input: {
+    key: string;
+    expiresInSeconds: number;
+    bucket?: string;
+  }): Promise<PresignedGetUrl> {
+    const bucket = this.resolveBucket(input.bucket ?? 'private');
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: input.key,
+    });
+    const url = await getSignedUrl(this.client, command, {
+      expiresIn: input.expiresInSeconds,
+    });
+    return {
+      url,
+      expiresAt: new Date(
+        Date.now() + input.expiresInSeconds * 1000,
+      ).toISOString(),
+    };
   }
 }

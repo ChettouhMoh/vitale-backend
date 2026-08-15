@@ -14,22 +14,36 @@ export interface PresignedUpload {
   expiresAt: string; // ISO
 }
 
+export interface PresignedGetUrl {
+  url: string;
+  expiresAt: string;
+}
+
 /**
  * IStorageProvider — the storage port. A real adapter (S3 / GCS / Cloudinary)
  * or the in-memory fake implements it. Expanded well beyond temtem's
  * upload/delete: it also mints presigned URLs and verifies uploaded objects so
  * the presigned + confirm flow is possible.
+ *
+ * Buckets:
+ * - Public bucket: avatars, logos — permanent public URLs.
+ * - Private bucket: KYC / identity docs — no public reads; access is only via
+ *   `createPresignedGetUrl` after an authorization check.
  */
 export interface IStorageProvider {
+  /** Resolve the effective bucket for a given logical bucket name. */
+  resolveBucket(bucket: string): string;
+
   /** Proxy path: store bytes the backend has already validated. Returns a URL. */
   upload(input: {
     key: string;
     buffer: Buffer;
     mimeType: string;
+    bucket?: string;
   }): Promise<{ url: string }>;
 
   /** Remove an object (idempotent). */
-  delete(key: string): Promise<void>;
+  delete(input: { key: string; bucket?: string }): Promise<void>;
 
   /** Mint a short-lived direct-to-storage upload URL for the given key. */
   createPresignedUpload(input: {
@@ -37,13 +51,27 @@ export interface IStorageProvider {
     mimeType: string;
     maxBytes: number;
     expiresInSeconds: number;
+    bucket?: string;
   }): Promise<PresignedUpload>;
 
   /**
    * Confirm an object actually exists and return its real metadata, or null if
    * it was never uploaded. Used by confirm-upload to avoid trusting the client.
    */
-  verifyExists(key: string): Promise<StoredObjectInfo | null>;
+  verifyExists(input: {
+    key: string;
+    bucket?: string;
+  }): Promise<StoredObjectInfo | null>;
+
+  /**
+   * Mint a short-lived direct-to-storage GET URL for a private object.
+   * Only the attachment owner or an admin may call this (enforced upstream).
+   */
+  createPresignedGetUrl(input: {
+    key: string;
+    expiresInSeconds: number;
+    bucket?: string;
+  }): Promise<PresignedGetUrl>;
 }
 
 export const IStorageProvider = Symbol('IStorageProvider');
