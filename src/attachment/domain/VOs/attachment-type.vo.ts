@@ -11,6 +11,7 @@ interface TypeConstraints {
   readonly maxBytes: number;
   readonly allowedMimes: readonly string[];
   readonly strategy: UploadStrategy;
+  readonly isPrivate: boolean;
 }
 
 /**
@@ -24,36 +25,43 @@ const CONSTRAINTS: Record<AttachmentTypeValue, TypeConstraints> = {
     maxBytes: 5 * MB,
     allowedMimes: IMAGE_MIMES,
     strategy: UploadStrategy.Proxy,
+    isPrivate: false,
   },
   [AttachmentTypeValue.NationalIdFront]: {
     maxBytes: 10 * MB,
     allowedMimes: DOC_MIMES,
     strategy: UploadStrategy.Proxy,
+    isPrivate: true,
   },
   [AttachmentTypeValue.NationalIdBack]: {
     maxBytes: 10 * MB,
     allowedMimes: DOC_MIMES,
     strategy: UploadStrategy.Proxy,
+    isPrivate: true,
   },
   [AttachmentTypeValue.MedicalDegree]: {
     maxBytes: 20 * MB,
     allowedMimes: DOC_MIMES,
     strategy: UploadStrategy.Presigned,
+    isPrivate: true,
   },
   [AttachmentTypeValue.PracticeLicense]: {
     maxBytes: 20 * MB,
     allowedMimes: DOC_MIMES,
     strategy: UploadStrategy.Presigned,
+    isPrivate: true,
   },
   [AttachmentTypeValue.EthicsCouncilCertificate]: {
     maxBytes: 20 * MB,
     allowedMimes: DOC_MIMES,
     strategy: UploadStrategy.Presigned,
+    isPrivate: true,
   },
   [AttachmentTypeValue.TenancyAgreement]: {
     maxBytes: 20 * MB,
     allowedMimes: DOC_MIMES,
     strategy: UploadStrategy.Presigned,
+    isPrivate: true,
   },
 };
 
@@ -66,7 +74,9 @@ export class AttachmentType {
   private constructor(private readonly _value: AttachmentTypeValue) {}
 
   static create(value: string): AttachmentType {
-    const match = Object.values(AttachmentTypeValue).find((t) => t === value);
+    const match = Object.values(AttachmentTypeValue).find(
+      (t) => String(t) === value,
+    );
     if (!match) {
       throw new DomainError(
         AttachmentErrorCode.INVALID_ATTACHMENT_TYPE,
@@ -94,6 +104,10 @@ export class AttachmentType {
     return this.constraints.strategy;
   }
 
+  get isPrivate(): boolean {
+    return this.constraints.isPrivate;
+  }
+
   /**
    * Deterministic, owner-isolated storage key: `<type>/<ownerId>/<fileId>`.
    * The key is always server-derived — never built from a client filename — so
@@ -114,10 +128,7 @@ export class AttachmentType {
 
   assertSizeWithinLimit(bytes: number): void {
     if (bytes <= 0) {
-      throw new DomainError(
-        AttachmentErrorCode.INVALID_FILE,
-        'File is empty',
-      );
+      throw new DomainError(AttachmentErrorCode.INVALID_FILE, 'File is empty');
     }
     if (bytes > this.maxBytes) {
       throw new DomainError(

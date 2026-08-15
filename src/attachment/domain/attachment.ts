@@ -234,6 +234,9 @@ export class Attachment {
   get type(): string {
     return this.props.type.value;
   }
+  get typeVO(): AttachmentType {
+    return this.props.type;
+  }
   get status(): AttachmentStatus {
     return this.props.status;
   }
