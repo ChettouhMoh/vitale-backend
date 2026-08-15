@@ -76,6 +76,7 @@ export class RequestPresignedUploadController {
       mimeType: dto.mimeType,
       maxBytes: type.maxBytes,
       expiresInSeconds: PRESIGN_TTL_SECONDS,
+      bucket: type.isPrivate ? 'private' : 'public',
     });
 
     await this.repo.save(attachment);

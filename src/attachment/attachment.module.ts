@@ -4,6 +4,7 @@ import { UploadAttachmentController } from './use-cases/upload-attachment/upload
 import { RequestPresignedUploadController } from './use-cases/request-presigned-upload/request-presigned-upload.controller';
 import { ConfirmUploadController } from './use-cases/confirm-upload/confirm-upload.controller';
 import { DeleteAttachmentController } from './use-cases/delete-attachment/delete-attachment.controller';
+import { GetAttachmentUrlController } from './use-cases/get-attachment-url/get-attachment-url.controller';
 import { DevStorageController } from './dev/dev-storage.controller';
 
 /**
@@ -17,6 +18,7 @@ import { DevStorageController } from './dev/dev-storage.controller';
     RequestPresignedUploadController,
     ConfirmUploadController,
     DeleteAttachmentController,
+    GetAttachmentUrlController,
     // Dev-only presigned PUT sink (no-op in production).
     DevStorageController,
   ],

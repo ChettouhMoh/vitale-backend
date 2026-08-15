@@ -1,6 +1,7 @@
 import {
   Controller,
   Put,
+  Get,
   Param,
   Req,
   Inject,
@@ -13,7 +14,7 @@ import { IStorageProvider } from '@/attachment/ports/storage-provider.interface'
 
 /**
  * Structural view of the in-memory fake's dev seam — lets us receive the
- * simulated client PUT without coupling this controller to the concrete class.
+ * simulated client PUT/GET without coupling this controller to the concrete class.
  */
 interface DevStorageSink {
   completePresignedUpload(
@@ -21,6 +22,10 @@ interface DevStorageSink {
     buffer: Buffer,
     mimeType?: string,
   ): { key: string };
+  completePresignedGet(token: string): {
+    buffer: Buffer;
+    mimeType: string;
+  } | null;
 }
 
 /**
@@ -66,5 +71,29 @@ export class DevStorageController {
       buffer,
       typeof contentType === 'string' ? contentType : undefined,
     );
+  }
+
+  @Get('_dev/get/:token')
+  get(@Param('token') token: string): { buffer: string; mimeType: string } {
+    if (process.env.NODE_ENV === 'production') {
+      throw new NotFoundException();
+    }
+
+    const sink = this.storage as unknown as DevStorageSink;
+    if (typeof sink.completePresignedGet !== 'function') {
+      throw new BadRequestException(
+        'Presigned GET dev sink is only available with the in-memory storage provider',
+      );
+    }
+
+    const result = sink.completePresignedGet(token);
+    if (!result) {
+      throw new NotFoundException('Presigned GET token not found or expired');
+    }
+
+    return {
+      buffer: result.buffer.toString('base64'),
+      mimeType: result.mimeType,
+    };
   }
 }

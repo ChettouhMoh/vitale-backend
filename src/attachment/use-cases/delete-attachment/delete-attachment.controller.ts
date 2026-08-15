@@ -40,7 +40,10 @@ export class DeleteAttachmentController {
     attachment.assertOwnedBy(ownerId);
 
     // Remove the bytes first, then soft-delete the row.
-    await this.storage.delete(attachment.storageKey);
+    await this.storage.delete({
+      key: attachment.storageKey,
+      bucket: attachment.typeVO.isPrivate ? 'private' : 'public',
+    });
     attachment.markDeleted();
     await this.repo.save(attachment);
 

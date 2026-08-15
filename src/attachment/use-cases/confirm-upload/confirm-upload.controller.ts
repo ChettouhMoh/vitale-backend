@@ -56,7 +56,10 @@ export class ConfirmUploadController {
     attachment.assertOwnedBy(ownerId);
 
     // NEVER trust the client's "I uploaded it" — check the store itself.
-    const info = await this.storage.verifyExists(attachment.storageKey);
+    const info = await this.storage.verifyExists({
+      key: attachment.storageKey,
+      bucket: attachment.typeVO.isPrivate ? 'private' : 'public',
+    });
     if (!info) {
       throw new DomainError(
         AttachmentErrorCode.UPLOAD_NOT_FOUND_IN_STORAGE,

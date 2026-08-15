@@ -106,6 +106,7 @@ export class UploadAttachmentService {
       key: attachment.storageKey,
       buffer: file.buffer,
       mimeType: sniffed,
+      bucket: attachmentType.isPrivate ? 'private' : 'public',
     });
     attachment.linkUploadedUrl(url);
 
