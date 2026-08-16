@@ -4,7 +4,6 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
-  HeadObjectCommand,
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -137,14 +136,29 @@ export class R2StorageProvider implements IStorageProvider {
   }): Promise<StoredObjectInfo | null> {
     const bucket = this.resolveBucket(input.bucket ?? 'public');
     try {
-      const { ContentLength, ETag } = await this.client.send(
-        new HeadObjectCommand({ Bucket: bucket, Key: input.key }),
+      // R2 does not reliably return Content-Type on HeadObject, so we use
+      // GetObject instead and discard the body stream — we only need metadata.
+      const response = await this.client.send(
+        new GetObjectCommand({ Bucket: bucket, Key: input.key }),
       );
-      if (!ContentLength) return null;
+      if (!response.ContentLength) return null;
+
+      // Consume and discard the body so the HTTP connection can be reused.
+      if (response.Body) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          for await (const _chunk of response.Body as AsyncIterable<Uint8Array>) {
+            // discard
+          }
+        } catch {
+          // body read errors are non-fatal for a metadata check
+        }
+      }
+
       return {
-        sizeBytes: Number(ContentLength),
-        sha256Digest: (ETag || '').replace(/"/g, ''),
-        mimeType: '',
+        sizeBytes: Number(response.ContentLength),
+        sha256Digest: (response.ETag || '').replace(/"/g, ''),
+        mimeType: response.ContentType || '',
         url: this.url(input.key, input.bucket ?? 'public'),
       };
     } catch {
