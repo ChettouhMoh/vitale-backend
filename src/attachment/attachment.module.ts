@@ -6,6 +6,7 @@ import { ConfirmUploadController } from './use-cases/confirm-upload/confirm-uplo
 import { DeleteAttachmentController } from './use-cases/delete-attachment/delete-attachment.controller';
 import { GetAttachmentUrlController } from './use-cases/get-attachment-url/get-attachment-url.controller';
 import { DevStorageController } from './dev/dev-storage.controller';
+import { DevListAttachmentsController } from './dev/dev-list-attachments.controller';
 
 /**
  * Attachment bounded context. Global so its `UploadAttachmentService` can be
@@ -19,8 +20,8 @@ import { DevStorageController } from './dev/dev-storage.controller';
     ConfirmUploadController,
     DeleteAttachmentController,
     GetAttachmentUrlController,
-    // Dev-only presigned PUT sink (no-op in production).
     DevStorageController,
+    DevListAttachmentsController,
   ],
   providers: [UploadAttachmentService],
   exports: [UploadAttachmentService],

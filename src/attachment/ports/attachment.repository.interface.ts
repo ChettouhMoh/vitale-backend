@@ -7,6 +7,7 @@ import { Attachment } from '../domain/attachment';
 export interface IAttachmentRepository {
   save(attachment: Attachment): Promise<void>;
   findById(id: string): Promise<Attachment | null>;
+  listAll(): Promise<Attachment[]>;
 }
 
 export const IAttachmentRepository = Symbol('IAttachmentRepository');

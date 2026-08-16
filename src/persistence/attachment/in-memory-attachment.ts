@@ -18,4 +18,8 @@ export class InMemoryAttachmentRepository implements IAttachmentRepository {
   async findById(id: string): Promise<Attachment | null> {
     return this.store.get(id) ?? null;
   }
+
+  async listAll(): Promise<Attachment[]> {
+    return Array.from(this.store.values());
+  }
 }
