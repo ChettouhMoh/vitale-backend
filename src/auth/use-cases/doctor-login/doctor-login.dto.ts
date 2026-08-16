@@ -2,7 +2,7 @@ import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class DoctorLoginDto {
-  @ApiProperty({ example: 'sarah.ahmed@vitale.dz' })
+  @ApiProperty({ example: 'mohchettouh80@gmail.com' })
   @IsEmail()
   @MaxLength(255)
   email!: string;
@@ -10,7 +10,7 @@ export class DoctorLoginDto {
   // No min-length here on purpose: enforcing password rules on LOGIN would leak
   // policy and reject legacy passwords. Any non-empty string is accepted and
   // checked against the stored hash.
-  @ApiProperty({ example: 'S3curePass!2345' })
+  @ApiProperty({ example: 'VitaleDemo123!' })
   @IsString()
   @MinLength(1)
   @MaxLength(128)
