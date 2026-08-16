@@ -237,6 +237,9 @@ export class Attachment {
   get typeVO(): AttachmentType {
     return this.props.type;
   }
+  get collectionName(): string {
+    return this.props.type.collectionName();
+  }
   get status(): AttachmentStatus {
     return this.props.status;
   }

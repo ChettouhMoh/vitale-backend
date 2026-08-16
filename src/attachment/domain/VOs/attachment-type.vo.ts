@@ -5,13 +5,28 @@ import { AttachmentTypeValue, UploadStrategy } from '../attachment.enums';
 const MB = 1024 * 1024;
 
 const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp'] as const;
-const DOC_MIMES = ['application/pdf', 'image/jpeg', 'image/png'] as const;
+const DOC_MIMES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/bmp',
+  'image/tiff',
+] as const;
+
+export type AttachmentCategory =
+  | 'avatar'
+  | 'kyc'
+  | 'medical-record'
+  | 'radiology';
 
 interface TypeConstraints {
   readonly maxBytes: number;
   readonly allowedMimes: readonly string[];
   readonly strategy: UploadStrategy;
   readonly isPrivate: boolean;
+  readonly category: AttachmentCategory;
 }
 
 /**
@@ -26,42 +41,49 @@ const CONSTRAINTS: Record<AttachmentTypeValue, TypeConstraints> = {
     allowedMimes: IMAGE_MIMES,
     strategy: UploadStrategy.Proxy,
     isPrivate: false,
+    category: 'avatar',
   },
   [AttachmentTypeValue.NationalIdFront]: {
     maxBytes: 10 * MB,
     allowedMimes: DOC_MIMES,
-    strategy: UploadStrategy.Proxy,
+    strategy: UploadStrategy.Presigned,
     isPrivate: true,
+    category: 'kyc',
   },
   [AttachmentTypeValue.NationalIdBack]: {
     maxBytes: 10 * MB,
     allowedMimes: DOC_MIMES,
-    strategy: UploadStrategy.Proxy,
+    strategy: UploadStrategy.Presigned,
     isPrivate: true,
+    category: 'kyc',
   },
   [AttachmentTypeValue.MedicalDegree]: {
     maxBytes: 20 * MB,
     allowedMimes: DOC_MIMES,
     strategy: UploadStrategy.Presigned,
     isPrivate: true,
+    category: 'kyc',
   },
   [AttachmentTypeValue.PracticeLicense]: {
     maxBytes: 20 * MB,
     allowedMimes: DOC_MIMES,
     strategy: UploadStrategy.Presigned,
     isPrivate: true,
+    category: 'kyc',
   },
   [AttachmentTypeValue.EthicsCouncilCertificate]: {
     maxBytes: 20 * MB,
     allowedMimes: DOC_MIMES,
     strategy: UploadStrategy.Presigned,
     isPrivate: true,
+    category: 'kyc',
   },
   [AttachmentTypeValue.TenancyAgreement]: {
     maxBytes: 20 * MB,
     allowedMimes: DOC_MIMES,
     strategy: UploadStrategy.Presigned,
     isPrivate: true,
+    category: 'kyc',
   },
 };
 
@@ -106,6 +128,30 @@ export class AttachmentType {
 
   get isPrivate(): boolean {
     return this.constraints.isPrivate;
+  }
+  get category(): AttachmentCategory {
+    return this.constraints.category;
+  }
+
+  /**
+   * Scope-specific collection/table name for this attachment type.
+   *
+   * MongoDB: use as the collection name.
+   * SQL: use as the table name.
+   *
+   * The mapping is deliberately flat — new categories just add a new entry.
+   * If you need entity-qualified names (e.g. `doctors_kyc_attachments` vs
+   * `patients_kyc_attachments`), wrap this in a resolver that prefixes the
+   * entity name at the repository level.
+   */
+  collectionName(): string {
+    const map: Record<AttachmentCategory, string> = {
+      avatar: 'avatars',
+      kyc: 'kyc_attachments',
+      'medical-record': 'medical_records',
+      radiology: 'radiology_attachments',
+    };
+    return map[this.category];
   }
 
   /**
