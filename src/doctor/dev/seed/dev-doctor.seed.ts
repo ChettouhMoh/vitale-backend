@@ -36,10 +36,10 @@ import {
  * Skipped entirely in production — this only touches in-memory repos.
  */
 const DOCTOR_ID = 'doctor-123';
-const DEMO_EMAIL = 'mohchettouh80@gmail.com';
+const DEMO_EMAIL = 'chettouhmoh80@gmail.com';
 const DEMO_NAME = 'Mohamed Chettouh';
 const DEMO_PASSWORD = 'VitaleDemo123!';
-const DEMO_PHONE = '+213555123456';
+const DEMO_PHONE = '+213668804157';
 const DEMO_SPECIALTY = 'Cardiology';
 const DEMO_LICENSE = 'DZ-MED-123456';
 const PRACTICE_START_YEAR = 2020;
