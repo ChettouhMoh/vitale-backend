@@ -1,5 +1,12 @@
-import { Controller, Post, Inject, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Inject,
+  HttpCode,
+  HttpStatus,
+  Body,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { DoctorResponse } from '../get-doctor';
 import { DoctorErrorCode } from '@/doctor/domain';
 import { IDoctorRepository } from '@/doctor/ports';
@@ -8,6 +15,8 @@ import { DomainError } from '@/common/errors/domain.error';
 import { CurrentUser } from '@/auth/decorators';
 import { IEventBus } from '@/shared/events/ports';
 import { AttachmentTypeValue } from '@/attachment/domain';
+import { SubmitVerificationDto } from './submit-verification.dto';
+import { LoggerService } from '@/common/logger/logger.service';
 
 const REQUIRED_KYC_TYPES: AttachmentTypeValue[] = [
   AttachmentTypeValue.NationalIdFront,
@@ -28,11 +37,13 @@ export class SubmitVerificationController {
     private readonly attachments: IAttachmentRepository,
     @Inject(IEventBus)
     private readonly events: IEventBus,
+    private readonly logger: LoggerService,
   ) {}
 
   @Post('me/verification')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Submit KYC for verification (→ pending)' })
+  @ApiBody({ type: SubmitVerificationDto })
   @ApiResponse({ status: 200, type: DoctorResponse })
   @ApiResponse({ status: 404, description: 'Doctor not found' })
   @ApiResponse({
@@ -43,7 +54,10 @@ export class SubmitVerificationController {
     status: 400,
     description: 'Missing required KYC documents',
   })
-  async execute(@CurrentUser('id') doctorId: string): Promise<DoctorResponse> {
+  async execute(
+    @CurrentUser('id') doctorId: string,
+    @Body() dto: SubmitVerificationDto,
+  ): Promise<DoctorResponse> {
     const doctor = await this.doctors.findById(doctorId);
     if (!doctor) {
       throw new DomainError(
@@ -55,7 +69,7 @@ export class SubmitVerificationController {
 
     const allAttachments = await this.attachments.findActiveByOwner(
       doctorId,
-      'kyc',
+      'kyc_attachments',
     );
     const submittedTypes = new Set(
       allAttachments
@@ -74,17 +88,24 @@ export class SubmitVerificationController {
       );
     }
 
+    if (dto.clinicAddress || dto.activityType) {
+      doctor.updateKycProfile(
+        dto.clinicAddress ?? null,
+        dto.activityType ?? null,
+      );
+    }
+
     doctor.submitForVerification();
     await this.doctors.save(doctor);
 
-    const kycAttachmentIds = allAttachments
-      .filter((a) => REQUIRED_KYC_TYPES.includes(a.type as AttachmentTypeValue))
-      .map((a) => a.id);
+    const kycAttachmentIds = allAttachments.map((a) => a.id);
 
-    await this.events.emit('doctor.kyc.submitted', {
+    await this.events.emit('doctor.kyc_submitted', {
       doctorId,
       attachmentIds: kycAttachmentIds,
     });
+
+    this.logger.info(`KYC submitted for doctor: ${doctorId}`);
 
     return DoctorResponse.from(doctor);
   }

@@ -42,6 +42,8 @@ export interface DoctorRecord {
   affiliationName: string | null;
   affiliationType: string;
   affiliationDepartment: string | null;
+  clinicAddress: string | null;
+  kycActivityType: string | null;
   accountStatus: string;
   verificationStatus: string;
   verificationRejectionReason: string | null;
@@ -61,6 +63,8 @@ interface DoctorProps {
   medicalLicenseNumber: string | null;
   practiceStartYear: number | null;
   affiliation: PracticeAffiliation;
+  clinicAddress: string | null;
+  kycActivityType: string | null;
   accountStatus: AccountStatus;
   verificationStatus: VerificationStatus;
   verifiedBy: string | null;
@@ -102,6 +106,8 @@ export class Doctor {
           WorkplaceType.Independent,
           null,
         ),
+        clinicAddress: null,
+        kycActivityType: null,
         accountStatus: AccountStatus.pending(),
         verificationStatus: VerificationStatus.create(
           VerificationStatusValue.Unverified,
@@ -132,6 +138,8 @@ export class Doctor {
           record.affiliationType,
           record.affiliationDepartment,
         ),
+        clinicAddress: record.clinicAddress,
+        kycActivityType: record.kycActivityType,
         accountStatus: AccountStatus.create(record.accountStatus),
         verificationStatus: VerificationStatus.create(
           record.verificationStatus,
@@ -160,9 +168,12 @@ export class Doctor {
       affiliationName: this.props.affiliation.name,
       affiliationType: this.props.affiliation.type,
       affiliationDepartment: this.props.affiliation.department,
+      clinicAddress: this.props.clinicAddress,
+      kycActivityType: this.props.kycActivityType,
       accountStatus: this.props.accountStatus.value,
       verificationStatus: this.props.verificationStatus.value,
-      verificationRejectionReason: this.props.verificationStatus.rejectionReason,
+      verificationRejectionReason:
+        this.props.verificationStatus.rejectionReason,
       verifiedBy: this.props.verifiedBy,
       createdAt: this.props.createdAt,
       updatedAt: this.props.updatedAt,
@@ -173,7 +184,7 @@ export class Doctor {
     this.props.updatedAt = new Date();
   }
 
-  // ─── Behaviours ─────────────────────────────────────────────────────────────
+  // ─── Behaviours ──────────────────────────────────────────────────────────────
 
   updateIdentity(fullName: string, practiceStartYear: number | null): void {
     this.props.fullName = fullName.trim();
@@ -201,6 +212,15 @@ export class Doctor {
     this.touch();
   }
 
+  updateKycProfile(
+    clinicAddress: string | null,
+    activityType: string | null,
+  ): void {
+    this.props.clinicAddress = clinicAddress?.trim() || null;
+    this.props.kycActivityType = activityType?.trim() || null;
+    this.touch();
+  }
+
   setAvatar(attachmentId: string | null): void {
     this.props.avatarAttachmentId = attachmentId;
     this.touch();
@@ -223,7 +243,8 @@ export class Doctor {
 
   /** Admin decision: reject with a reason. Records who rejected. */
   rejectVerification(adminId: string, reason: string): void {
-    this.props.verificationStatus = this.props.verificationStatus.reject(reason);
+    this.props.verificationStatus =
+      this.props.verificationStatus.reject(reason);
     this.props.verifiedBy = adminId;
     this.touch();
   }
@@ -298,6 +319,12 @@ export class Doctor {
   }
   get affiliationDepartment(): string | null {
     return this.props.affiliation.department;
+  }
+  get clinicAddress(): string | null {
+    return this.props.clinicAddress;
+  }
+  get kycActivityType(): string | null {
+    return this.props.kycActivityType;
   }
   get accountStatus(): string {
     return this.props.accountStatus.value;
