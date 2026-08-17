@@ -18,6 +18,7 @@ export enum DoctorErrorCode {
   TOO_MANY_EXPERTISE_ITEMS = 'TOO_MANY_EXPERTISE_ITEMS',
   TOO_MANY_LANGUAGES = 'TOO_MANY_LANGUAGES',
   TOO_MANY_EDUCATION_ENTRIES = 'TOO_MANY_EDUCATION_ENTRIES',
+  ALREADY_VERIFIED = 'ALREADY_VERIFIED',
 
   // Integrity guards for restoreExisting() (untrusted DB values) + the
   // affiliation "independent has no workplace name" rule.

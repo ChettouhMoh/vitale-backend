@@ -67,6 +67,25 @@ export class SubmitVerificationController {
       );
     }
 
+    if (doctor.verificationStatus === 'verified') {
+      throw new DomainError(
+        DoctorErrorCode.ALREADY_VERIFIED,
+        'This account is already approved — no further KYC submission is needed',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    if (
+      doctor.verificationStatus !== 'unverified' &&
+      doctor.verificationStatus !== 'rejected'
+    ) {
+      throw new DomainError(
+        DoctorErrorCode.INVALID_VERIFICATION_TRANSITION,
+        `Cannot submit verification from status ${doctor.verificationStatus}`,
+        HttpStatus.CONFLICT,
+      );
+    }
+
     const allAttachments = await this.attachments.findActiveByOwner(
       doctorId,
       'kyc_attachments',
