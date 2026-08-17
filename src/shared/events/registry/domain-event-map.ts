@@ -42,7 +42,7 @@ export interface DomainEventMap {
     fullName: string;
     locale: string;
   };
-  'doctor.kyc.submitted': {
+  'doctor.kyc_submitted': {
     doctorId: string;
     attachmentIds: string[];
   };
@@ -88,7 +88,7 @@ export const DOMAIN_EVENT_NAMES = [
   'auth.password_changed',
   'auth.pending_account_claimed',
   'doctor.registered',
-  'doctor.kyc.submitted',
+  'doctor.kyc_submitted',
   'doctor.kyc_approved',
   'doctor.kyc_rejected',
   'patient.created',
