@@ -12,6 +12,7 @@ import {
   ApiParam,
   ApiBody,
   ApiResponse,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 import { UpdateVaccineDto } from './update-vaccine.dto';
 import { VaccineResponse } from '../get-patient-vaccines/get-patient-vaccines.response';
@@ -21,6 +22,7 @@ import { IVaccineRepository } from '@/patient-record/vaccine/ports/vaccine.repos
 import { LoggerService } from '@/common/logger/logger.service';
 
 @ApiTags('Vaccines')
+@ApiCookieAuth()
 @Controller({ path: 'vaccines', version: '1' })
 export class UpdateVaccineController {
   constructor(
