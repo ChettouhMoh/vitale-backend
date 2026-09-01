@@ -19,6 +19,7 @@ import { IPatientRepository } from '@/patient-record/patient/ports/patient.repos
 import { LoggerService } from '@/common/logger/logger.service';
 
 @ApiTags('Patients')
+@ApiCookieAuth()
 @Controller({ path: 'patients', version: '1' })
 export class CreatePatientController {
   constructor(
