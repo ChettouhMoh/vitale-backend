@@ -6,7 +6,7 @@ import {
   Inject,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 import { UpdateChronicDiseasesDto } from './update-chronic-diseases.dto';
 import { PatientErrorCode } from '@/common/errors/codes';
@@ -20,6 +20,7 @@ class PatientIdParam {
 }
 
 @ApiTags('Patients')
+@ApiCookieAuth()
 @Controller({ path: 'patients', version: '1' })
 export class UpdateChronicDiseasesController {
   constructor(
