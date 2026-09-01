@@ -1,11 +1,12 @@
 import { Controller, Delete, Param, Inject, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
 import { MedicationErrorCode } from '@/common/errors/codes';
 import { DomainError } from '@/common/errors/domain.error';
 import { IMedicationRepository } from '@/patient-record/medication/ports/medication.repository.interface';
 import { LoggerService } from '@/common/logger/logger.service';
 
 @ApiTags('Medications')
+@ApiCookieAuth()
 @Controller({ path: 'medications', version: '1' })
 export class DeleteMedicationController {
   constructor(

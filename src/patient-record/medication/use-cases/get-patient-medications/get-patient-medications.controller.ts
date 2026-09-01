@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Inject } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 import { MedicationResponse } from './get-patient-medications.response';
 import { IMedicationRepository } from '@/patient-record/medication/ports/medication.repository.interface';
@@ -10,6 +10,7 @@ class PatientIdParam {
 }
 
 @ApiTags('Medications')
+@ApiCookieAuth()
 @Controller({ path: 'patients', version: '1' })
 export class GetPatientMedicationsController {
   constructor(

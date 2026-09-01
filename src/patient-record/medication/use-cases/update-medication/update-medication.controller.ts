@@ -12,6 +12,7 @@ import {
   ApiParam,
   ApiBody,
   ApiResponse,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 import { UpdateMedicationDto } from './update-medication.dto';
 import { MedicationResponse } from '../get-patient-medications/get-patient-medications.response';
@@ -21,6 +22,7 @@ import { IMedicationRepository } from '@/patient-record/medication/ports/medicat
 import { LoggerService } from '@/common/logger/logger.service';
 
 @ApiTags('Medications')
+@ApiCookieAuth()
 @Controller({ path: 'medications', version: '1' })
 export class UpdateMedicationController {
   constructor(

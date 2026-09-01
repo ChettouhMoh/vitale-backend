@@ -13,6 +13,7 @@ import {
   ApiParam,
   ApiBody,
   ApiResponse,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 import { AddMedicationDto } from './add-medication.dto';
@@ -27,6 +28,7 @@ class PatientIdParam {
 }
 
 @ApiTags('Medications')
+@ApiCookieAuth()
 @Controller({ path: 'patients', version: '1' })
 export class AddMedicationController {
   constructor(
